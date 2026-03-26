@@ -55,9 +55,9 @@ window.IBParallax = (function () {
                 scrollDepth: config.scrollDepth || 500
             };
 
-            container.className = "d-flex align-items-center justify-content-center mb-5";
+            container.className = "d-flex align-items-center justify-content-center mt-3 mb-5";
             container.style.borderRadius = '20px';
-            
+
             var containerStyle = {
                 position: 'relative',
                 height: settings.height,
@@ -101,12 +101,12 @@ window.IBParallax = (function () {
             var contentWrap = document.createElement('div');
             contentWrap.className = "container text-center";
             contentWrap.style.zIndex = "10";
-            contentWrap.innerHTML = 
+            contentWrap.innerHTML =
                 '<p class="text-uppercase font-weight-bold mb-2" style="letter-spacing: 0.2em; font-size: 0.8rem; color: #6366f1;">' + settings.unit + '</p>' +
                 '<h1 class="display-4 font-weight-bold m-0" style="color: #1e1b4b;">' + settings.title + '</h1>' +
                 '<div class="mx-auto my-3" style="width: 80px; height: 6px; background: linear-gradient(to right, #6366f1, #a855f7); border-radius: 3px;"></div>' +
-                '<p class="lead text-secondary mx-auto" style="max-width: 550px;">' + settings.description + '</p>';
-            
+                '<p class="lead text-info mx-auto" style="max-width: 550px;">' + settings.description + '</p>';
+
             container.appendChild(contentWrap);
 
             // --- Lógica de Animación Unificada ---
