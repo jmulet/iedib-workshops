@@ -148,6 +148,7 @@ window.IB.sd =  window.IB.sd || {};
             var ascore = evt.getScore() * 10 / evt.getMaxScore();
            
             if(hasIAPace && elem.dataset.category && ascore!=null && !isNaN(ascore)) {
+                // TODO::: Check if pregunta startswith 0-9
                 preguntes[pregunta] = ascore;
                 console.log("Adding score to " + elem.dataset.category, ascore)
                 IB.iapace.addScore(elem.dataset.category, ascore);
