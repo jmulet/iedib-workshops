@@ -3,132 +3,105 @@ if (window.AOS && typeof window.AOS.init == 'function') {
 }
 
 /**
- * IBParallax API
- * Una mini librería para crear secciones hero con efectos de paralaje (Mouse + Scroll).
+ * IBParallax API 
+ * Un potenciador puramente declarativo para secciones Hero con efectos de paralaje (Mouse + Scroll).
  * (c) Josep Mulet Pol (2026)
+ * 
+ * --- DOCUMENTACIÓN DE ATRIBUTOS (Declarativo) ---
+ * 
+ * En el CONTENEDOR principal [data-snptd="parallax"]:
+ *  - data-snptd="parallax"        : Identificador para auto-activación.
+ *  - data-scroll-depth="300"      : Intensidad del efecto de scroll (Default: 300).
+ *  - data-parallax-mode="both"    : Modo de interacción: "both", "mouse", "scroll" (Default: "both").
+ *  - data-parallax-multiplier="140": Sensibilidad al movimiento del ratón (Default: 140).
+ *  - data-parallax-transition="0.1s": Suavidad del movimiento (CSS transition duration) (Default: "0.1s").
+ *  - data-parallax-direction="both": Restricción de ejes: "both", "x", "y" (Default: "both").
+ * 
+ * En las CAPAS (Layers) hijas [data-depth]:
+ *  - data-depth="0.1"             : Factor de profundidad. 
+ *                                   Valores > 0 siguen el movimiento.
+ *                                   Valores < 0 invierten el movimiento.
+ *                                   Valores mayores incrementan el desplazamiento.
+ * 
+ * --- EJEMPLOS ---
+ * 
+ * Ejemplo 1 (Básico con texto):
+ * <div data-snptd="parallax" style="position:relative; height:300px; overflow:hidden;">
+ *    <div data-depth="0.2" style="top:20%; left:10%;">CAPA FONDO</div>
+ *    <div data-depth="0.5" style="top:50%; left:30%;">CAPA FRENTE</div>
+ * </div>
+ * 
+ * Ejemplo 2 (Imágenes PNG capas):
+ * <div data-snptd="parallax" data-parallax-mode="scroll" style="...">
+ *    <img src="bg.png" data-depth="0.05" style="position:absolute; width:110%;">
+ *    <img src="mg.png" data-depth="0.2" style="position:absolute; width:110%;">
+ *    <img src="fg.png" data-depth="0.4" style="position:absolute; width:110%;">
+ * </div>
  */
 window.IBParallax = (function () {
 
-    var createLayer = function (data) {
-        var div = document.createElement('div');
-        div.className = 'parallax-layer';
-        div.setAttribute('data-depth', data.depth || 0.1);
-        div.innerText = data.text;
+    var init = function (container) {
+        if (!container) return;
 
-        var style = {
-            position: 'absolute',
-            pointerEvents: 'none',
-            transition: 'transform 0.1s ease-out',
-            fontWeight: '900',
-            userSelect: 'none',
-            color: data.color || '#818cf8',
-            top: data.top || 'auto',
-            left: data.left || 'auto',
-            right: data.right || 'auto',
-            bottom: data.bottom || 'auto',
-            fontSize: data.fontSize || '2rem',
-            opacity: data.opacity || 0.5,
-            willChange: 'transform'
-        };
+        // --- Configuración via atributos data-* ---
+        var scrollDepth = parseInt(container.getAttribute('data-scroll-depth')) || 300;
+        var mode = container.getAttribute('data-parallax-mode') || 'both'; // both, mouse, scroll
+        var multiplier = parseFloat(container.getAttribute('data-parallax-multiplier')) || 140;
+        var transition = container.getAttribute('data-parallax-transition') || '0.1s';
+        var direction = container.getAttribute('data-parallax-direction') || 'both'; // both, x, y
 
-        for (var key in style) {
-            if (style.hasOwnProperty(key)) {
-                div.style[key] = style[key];
+        var layers = container.querySelectorAll('[data-depth]');
+
+        // Preparar las capas
+        for (var i = 0; i < layers.length; i++) {
+            var layer = layers[i];
+            var layerStyle = getComputedStyle(layer);
+
+            if (layerStyle.position === 'static') {
+                layer.style.position = 'absolute';
             }
+
+            var transitionValue = 'transform ' + transition + ' ease-out';
+            layer.style.transition = transitionValue;
+            layer.style.webkitTransition = '-webkit-transform ' + transitionValue;
+            layer.style.willChange = 'transform';
         }
 
-        return div;
-    };
+        // --- Estado y Lógica ---
+        var mouseX = 0, mouseY = 0, scrollFactor = 0;
 
-    return {
-        init: function (containerId, config) {
-            var container = document.getElementById(containerId);
-            if (!container) return;
+        var updateParallax = function () {
+            var enableMouse = (mode === 'both' || mode === 'mouse');
+            var enableScroll = (mode === 'both' || mode === 'scroll');
 
-            var settings = {
-                height: config.height || '350px',
-                background: config.background || 'linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 50%, #fae8ff 100%)',
-                unit: config.unit || '',
-                title: config.title || '',
-                description: config.description || '',
-                layers: config.layers || [],
-                scrollDepth: config.scrollDepth || 500
-            };
+            for (var j = 0; j < layers.length; j++) {
+                var l = layers[j];
+                var depth = parseFloat(l.getAttribute('data-depth')) || 0;
+                var moveX = 0, moveY = 0;
 
-            container.className = "d-flex align-items-center justify-content-center mt-3 mb-5";
-            container.style.borderRadius = '20px';
-
-            var containerStyle = {
-                position: 'relative',
-                height: settings.height,
-                background: settings.background,
-                overflow: 'hidden'
-            };
-            for (var key in containerStyle) {
-                if (containerStyle.hasOwnProperty(key)) {
-                    container.style[key] = containerStyle[key];
+                // 1. Aportación del Ratón
+                if (enableMouse) {
+                    moveX += mouseX * (depth * multiplier);
+                    moveY += mouseY * (depth * multiplier);
                 }
-            }
 
-            // Esferas decorativas
-            var sphere1 = document.createElement('div');
-            var s1Style = {
-                position: 'absolute', borderRadius: '50%', pointerEvents: 'none',
-                width: '300px', height: '300px', top: '-50px', left: '-50px',
-                background: 'radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, rgba(255,255,255,0) 70%)'
-            };
-            for (var k1 in s1Style) {
-                if (s1Style.hasOwnProperty(k1)) sphere1.style[k1] = s1Style[k1];
-            }
-
-            var sphere2 = document.createElement('div');
-            var s2Style = {
-                position: 'absolute', borderRadius: '50%', pointerEvents: 'none',
-                width: '400px', height: '400px', bottom: '-100px', right: '-50px',
-                background: 'radial-gradient(circle, rgba(192, 132, 252, 0.15) 0%, rgba(255,255,255,0) 70%)'
-            };
-            for (var k2 in s2Style) {
-                if (s2Style.hasOwnProperty(k2)) sphere2.style[k2] = s2Style[k2];
-            }
-
-            container.appendChild(sphere1);
-            container.appendChild(sphere2);
-
-            for (var i = 0; i < settings.layers.length; i++) {
-                container.appendChild(createLayer(settings.layers[i]));
-            }
-
-            var contentWrap = document.createElement('div');
-            contentWrap.className = "container text-center";
-            contentWrap.style.zIndex = "10";
-            contentWrap.innerHTML =
-                '<p class="text-uppercase font-weight-bold mb-2" style="letter-spacing: 0.2em; font-size: 0.8rem; color: #6366f1;">' + settings.unit + '</p>' +
-                '<h1 class="display-4 font-weight-bold m-0" style="color: #1e1b4b;">' + settings.title + '</h1>' +
-                '<div class="mx-auto my-3" style="width: 80px; height: 6px; background: linear-gradient(to right, #6366f1, #a855f7); border-radius: 3px;"></div>' +
-                '<p class="lead text-info mx-auto" style="max-width: 550px;">' + settings.description + '</p>';
-
-            container.appendChild(contentWrap);
-
-            // --- Lógica de Animación Unificada ---
-            var mouseX = 0, mouseY = 0;
-            var scrollFactor = 0;
-
-            var updateParallax = function () {
-                var layers = container.querySelectorAll('.parallax-layer');
-                for (var j = 0; j < layers.length; j++) {
-                    var layer = layers[j];
-                    var depth = parseFloat(layer.getAttribute('data-depth'));
-
-                    // Combinamos el movimiento del ratón con el desplazamiento de scroll
-                    var moveX = mouseX * (depth * 140);
-                    var moveY = (mouseY * (depth * 140)) + (scrollFactor * (depth * settings.scrollDepth));
-
-                    layer.style.transform = 'translate(' + moveX + 'px, ' + moveY + 'px)';
-                    layer.style.webkitTransform = 'translate(' + moveX + 'px, ' + moveY + 'px)';
+                // 2. Aportación del Scroll (solo afecta eje Y normalmente, sumado a mouse)
+                if (enableScroll) {
+                    moveY += scrollFactor * (depth * scrollDepth);
                 }
-            };
 
-            // Listener para Mouse
+                // 3. Bloqueo de dirección
+                if (direction === 'x') moveY = 0;
+                if (direction === 'y') moveX = 0;
+
+                var transform = 'translate(' + moveX.toFixed(2) + 'px, ' + moveY.toFixed(2) + 'px)';
+                l.style.transform = transform;
+                l.style.webkitTransform = transform;
+            }
+        };
+
+        // Escuchador de Ratón
+        if (mode === 'both' || mode === 'mouse') {
             window.addEventListener('mousemove', function (e) {
                 var rect = container.getBoundingClientRect();
                 if (e.clientY >= rect.top && e.clientY <= rect.bottom) {
@@ -137,19 +110,41 @@ window.IBParallax = (function () {
                     updateParallax();
                 }
             });
+        }
 
-            // Listener para Scroll
+        // Escuchador de Scroll
+        if (mode === 'both' || mode === 'scroll') {
             window.addEventListener('scroll', function () {
                 var rect = container.getBoundingClientRect();
                 var viewportHeight = window.innerHeight;
-
-                // Solo calculamos si el elemento es visible en pantalla
                 if (rect.top < viewportHeight && rect.bottom > 0) {
-                    // Calculamos cuánto ha cruzado el hero la pantalla (-1 a 1)
                     scrollFactor = (rect.top / viewportHeight);
                     updateParallax();
                 }
             });
         }
+
+        // Posicionamiento inicial
+        updateParallax();
+    };
+
+    var bind = function () {
+        // Selector principal por atributo declarativo
+        var targets = document.querySelectorAll('[data-snptd="parallax"]');
+        for (var i = 0; i < targets.length; i++) {
+            var t = targets[i];
+            if (!t.getAttribute('data-parallax-active')) {
+                t.setAttribute('data-parallax-active', '1');
+                init(t);
+            }
+        }
+    };
+
+    return {
+        init: init,
+        bind: bind
     };
 })();
+
+// Auto-inicialización global
+IBParallax.bind();

@@ -1,23 +1,25 @@
 (function () {
 
-    if(!window.iedibAPI) {
+    if (!window.iedibAPI) {
         console.error("REQUIRES iedibAPI loaded in page");
     }
 
-    var pageInfo = iedibAPI.getPageInfo() || {};
+    var pageInfo = (window.iedibAPI && window.iedibAPI.getPageInfo()) || {};
     pageInfo.rank_name = "game_cards_geo_1bat";
 
     var reflowLatex = function () {
         if (window.MathJax) {
-            window.MathJax.typesetPromise && window.MathJax.typesetPromise();
-            window.MathJax.Hub && window.MathJax.Hub.Queue &&
+            if (window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise();
+            } else if (window.MathJax.Hub && window.MathJax.Hub.Queue) {
                 window.MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+            }
         }
     };
 
-    var pad2 = function(e) {
-        if(e<10) {
-            return "0"+e;
+    var pad2 = function (e) {
+        if (e < 10) {
+            return "0" + e;
         }
         return e;
     };
@@ -26,22 +28,30 @@
     var el = "\\" + ")";
 
     var turns = 0;
-    var $girs = $("#voltes");
-    var $crono = $("#comptador");
-    $girs.html("&nbsp;" + turns + "&nbsp;");
+    var girsEl = document.getElementById("voltes");
+    var cronoEl = document.getElementById("comptador");
+    if (girsEl) girsEl.innerHTML = "&nbsp;" + turns + "&nbsp;";
+
     var confetti = null;
     var cronoInterval = null;
 
     var Memory = {
 
         init: function (cards) {
-            this.$game = $(".fc_game");
-            this.$modal = $(".modal");
-            this.$overlay = $(".modal-overlay");
-            this.$restartButton = $("button.restart");
-            this.$restartButton.hide();
-            this.$startButton = $("button.start");
-            this.$startButton.on("click", this.onGameStart);
+            var self = this;
+            this.gameEl = document.querySelector(".fc_game");
+            this.modalEl = document.querySelector(".modal");
+            this.overlayEl = document.querySelector(".modal-overlay");
+            this.restartButton = document.querySelector("button.restart");
+            if (this.restartButton) this.restartButton.style.display = 'none';
+
+            this.startButton = document.querySelector("button.start");
+            if (this.startButton) {
+                this.startButton.addEventListener("click", function (e) {
+                    self.onGameStart(e);
+                });
+            }
+
             this.allCards = cards;
             this.cardsArray = cards;
             this.playing = false;
@@ -51,35 +61,33 @@
         },
 
         shuffleCards: function () {
-            // Limit to 8 pairs
-            var pairs = this.allCards.length / 2;
+            // Limit to 6 pairs (as per existing logic in shuffleCards)
+            var pairsCount = this.allCards.length / 2;
             var ids = [];
-            for (var i = 1; i <= pairs; i++) {
+            for (var i = 1; i <= pairsCount; i++) {
                 ids.push(i);
             }
-            // Shuffle the id's that we are considering
             ids = this.shuffle(ids);
-            // take up to 8 pairs
 
             this.cardsArray = [];
             for (var i = 0; i < 6; i++) {
                 var id = ids[i];
-                for (var j = 0; j < 2 * pairs; j++) {
-                    var ca = cards[j];
+                for (var j = 0; j < this.allCards.length; j++) {
+                    var ca = this.allCards[j];
                     if (ca.id == id) {
                         this.cardsArray.push(ca);
                     }
                 }
             }
             this.cardsArray = this.shuffle(this.cardsArray);
-            this.$cards = $(this.cardsArray);
         },
 
         setup: function () {
-            this.html = this.buildHTML();
-            this.$game.html(this.html);
+            if (this.gameEl) {
+                this.gameEl.innerHTML = this.buildHTML();
+            }
             reflowLatex();
-            this.$memoryCards = $(".carta");
+
             this.paused = false;
             this.guess = null;
             this.binding();
@@ -89,16 +97,27 @@
         },
 
         binding: function () {
-            this.$memoryCards.on("click", this.cardClicked);
-            this.$restartButton.on("click", $.proxy(this.reset, this));
+            var self = this;
+            var cardElements = document.querySelectorAll(".carta");
+            for (var i = 0; i < cardElements.length; i++) {
+                cardElements[i].addEventListener("click", function (e) {
+                    self.cardClicked(this);
+                });
+            }
+
+            if (this.restartButton) {
+                this.restartButton.addEventListener("click", function (e) {
+                    self.reset(e);
+                });
+            }
         },
+
         showModal: function (id) {
-            var _ = Memory;
             var feedback = "";
             var enunciat = "";
             var solucio = "";
-            for (var i = 0, len = _.cardsArray.length; i < len; i++) {
-                var ca = _.cardsArray[i];
+            for (var i = 0, len = this.cardsArray.length; i < len; i++) {
+                var ca = this.cardsArray[i];
                 if (ca.id == id && ca.feed) {
                     feedback = ca.feed || "";
                     enunciat = ca.desc || "";
@@ -107,213 +126,266 @@
                     solucio = ca.desc || "";
                 }
             }
+
             if (feedback) {
-                $('#enunciat_modal').html(enunciat);
-                $('#retroaccio_modal').html(feedback);
-                $('#solucio_modal').html(solucio);
+                var eModal = document.getElementById('enunciat_modal');
+                var rModal = document.getElementById('retroaccio_modal');
+                var sModal = document.getElementById('solucio_modal');
+                if (eModal) eModal.innerHTML = enunciat;
+                if (rModal) rModal.innerHTML = feedback;
+                if (sModal) sModal.innerHTML = solucio;
+
                 reflowLatex();
-                $('#exampleModal').modal('show');
+
+                // Vanilla Bootstrap Modal Trigger
+                var modal = document.getElementById('exampleModal');
+                if (modal) {
+                    if (window.bootstrap && window.bootstrap.Modal) {
+                        var modalInst = bootstrap.Modal.getOrCreateInstance(modal);
+                        modalInst.show();
+                    } else {
+                        // Fallback simple toggle if no bootstrap.js
+                        modal.classList.add('show');
+                        modal.style.display = 'block';
+                        document.body.classList.add('modal-open');
+                    }
+                }
             }
         },
-        // kinda messy but hey
-        cardClicked: function () {
-            var _ = Memory;
-            if (!_.playing) {
+
+        cardClicked: function (cardEl) {
+            if (!this.playing || this.paused) {
                 return;
             }
-            var $card = $(this);
-            if (!_.paused && !$card.find(".inside").hasClass("matched") && !$card.find(".inside").hasClass("picked")) {
-                $card.find(".inside").addClass("picked");
-                if (!_.guess) {
-                    // Selecció de la primera carta
-                    _.guess = $(this);
-                    turns += 1;
-                    $girs.html("" + turns + "&nbsp;");
 
-                } else if (_.guess.attr("data-id") == $(this).attr("data-id") && !$(this).hasClass("picked")) {
-                    $(".picked").addClass("matched");
-                    var id = _.guess.attr("data-id");
-                    _.showModal(id);
-                    _.guess = null;
+            var inside = cardEl.querySelector(".inside");
+            if (inside.classList.contains("matched") || inside.classList.contains("picked")) {
+                return;
+            }
+
+            inside.classList.add("picked");
+
+            if (!this.guess) {
+                // First card selected
+                this.guess = cardEl;
+                turns += 1;
+                if (girsEl) girsEl.innerHTML = "" + turns + "&nbsp;";
+            } else {
+                // Second card selected
+                if (this.guess.getAttribute("data-id") == cardEl.getAttribute("data-id") && this.guess !== cardEl) {
+                    var pickedEls = document.querySelectorAll(".inside.picked");
+                    for (var i = 0; i < pickedEls.length; i++) {
+                        pickedEls[i].classList.add("matched");
+                    }
+                    var id = this.guess.getAttribute("data-id");
+                    this.showModal(id);
+                    this.guess = null;
                 } else {
-                    _.guess = null;
-                    _.paused = true;
+                    this.guess = null;
+                    this.paused = true;
+                    var self = this;
                     setTimeout(function () {
-                        $(".picked").removeClass("picked");
-                        Memory.paused = false;
+                        var pickedEls = document.querySelectorAll(".inside.picked:not(.matched)");
+                        for (var i = 0; i < pickedEls.length; i++) {
+                            pickedEls[i].classList.remove("picked");
+                        }
+                        self.paused = false;
                     }, 600);
                 }
-                if ($(".matched").length == $(".carta").length) {
-                    _.win();
-                }
+            }
+
+            var allCards = document.querySelectorAll(".carta");
+            var matchedCards = document.querySelectorAll(".inside.matched");
+            if (matchedCards.length === allCards.length && allCards.length > 0) {
+                this.win();
             }
         },
 
         win: function () {
-            var _ = Memory;
+            var self = this;
             this.paused = true;
             if (!confetti && window.Confetti) {
                 var container = document.querySelector(".fc_wrap");
-                confetti = new Confetti(container);
+                confetti = new window.Confetti(container);
             }
             if (confetti) {
                 confetti.play();
             }
             setTimeout(function () {
-                _.$restartButton.hide();
-                _.$startButton.show();
+                if (self.restartButton) self.restartButton.style.display = 'none';
+                if (self.startButton) self.startButton.style.display = 'block';
+
                 if (cronoInterval) {
                     clearInterval(cronoInterval);
                     cronoInterval = null;
-                    // Calcula la puntuació
-                    var score = 10000 - 500*turns;
-                    if(score <0) {
-                        score = 0;
-                    }
-                    score = Math.floor(score*(300/(_.seconds+1)));
-                    var misc = JSON.stringify({seconds: _.seconds, girs: turns});
+
+                    var score = 10000 - 500 * turns;
+                    if (score < 0) score = 0;
+                    score = Math.floor(score * (300 / (self.seconds + 1)));
+
+                    var misc = JSON.stringify({ seconds: self.seconds, girs: turns });
                     var payload = JSON.parse(JSON.stringify(pageInfo));
                     payload.rank_misc = misc;
                     payload.rank_score = score;
-                    _.updateRanking(payload);
-                    _.seconds = 0;
+
+                    self.updateRanking(payload);
+                    self.seconds = 0;
                     turns = 0;
                 }
-                $crono.html("");
-                _.reset();
+                if (cronoEl) cronoEl.innerHTML = "";
+                self.reset();
             }, 1000);
         },
 
-        updateRanking: function(payload) {
-            var _ = Memory;
-            $.ajax({
-                type:"POST", // la variable type guarda el tipo de la peticion GET,POST,..
-                url:"https://piworld.es/iedibapi/ranking/update", //url guarda la ruta hacia donde se hace la peticion
-                data: payload, // data recive un objeto con la informacion que se enviara al servidor
-                dataType: "json",
-                success:function(datos){ //success es una funcion que se utiliza si el servidor retorna informacion
-                   console.log(datos);
-                   _.listRanking();
-                },
-                error: function(err) {
-                    console.error(err);
-                }
-            });
+        updateRanking: function (payload) {
+            var self = this;
+            var body = "";
+            for (var key in payload) {
+                if (body) body += "&";
+                body += encodeURIComponent(key) + "=" + encodeURIComponent(payload[key]);
+            }
 
+            fetch("https://ibsuite.es/iedibapi/ranking/update", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: body
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (datos) {
+                    console.log(datos);
+                    self.listRanking();
+                })
+                .catch(function (err) {
+                    console.error(err);
+                });
         },
 
-        listRanking: function() {
-            var _ = Memory; 
-            $.ajax({ 
-                type:"POST", // la variable type guarda el tipo de la peticion GET,POST,..
-                url:"https://piworld.es/iedibapi/ranking/list", //url guarda la ruta hacia donde se hace la peticion
-                data: pageInfo, // data recive un objeto con la informacion que se enviara al servidor
-                dataType: "json",
-                success:function(datos){ //success es una funcion que se utiliza si el servidor retorna informacion
-                     
-                    if(Array.isArray(datos)) {
-                        // Remove those who have no rank_score
-                        var k = datos.length
-                        while (k--) { 
-                            if(datos[k].rank_score <= 0) { 
-                                datos.splice(k, 1);
-                            } 
+        listRanking: function () {
+            var self = this;
+            var body = "";
+            for (var key in pageInfo) {
+                if (body) body += "&";
+                body += encodeURIComponent(key) + "=" + encodeURIComponent(pageInfo[key]);
+            }
+
+            fetch("https://ibsuite.es/iedibapi/ranking/list", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: body
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (datos) {
+                    if (Array.isArray(datos)) {
+                        var filtered = [];
+                        for (var k = 0; k < datos.length; k++) {
+                            if (datos[k].rank_score > 0) {
+                                filtered.push(datos[k]);
+                            }
+                        }
+                        datos = filtered;
+
+                        var first = document.getElementById('first_person');
+                        var second = document.getElementById('second_person');
+                        var third = document.getElementById('third_person');
+                        var you = document.getElementById('you_person');
+
+                        if (datos.length > 0 && first) {
+                            first.innerHTML = datos[0].full_name;
+                            first.setAttribute('title', datos[0].rank_score + ' punts');
+                        }
+                        if (second) {
+                            if (datos.length > 1) {
+                                second.innerHTML = datos[1].full_name;
+                                second.setAttribute('title', datos[1].rank_score + ' punts');
+                            } else {
+                                second.innerHTML = '----------------------';
+                            }
+                        }
+                        if (third) {
+                            if (datos.length > 2) {
+                                third.innerHTML = datos[2].full_name;
+                                third.setAttribute('title', datos[2].rank_score + ' punts');
+                            } else {
+                                third.innerHTML = '----------------------';
+                            }
                         }
 
-                        if(datos.length > 0) {
-                            $('#first_person').html(datos[0].full_name);
-                            $('#first_person').attr('title', datos[0].rank_score + ' punts');
+                        var pos = -1;
+                        for (var i = 0; i < datos.length; i++) {
+                            if (pageInfo.userFullname == datos[i].full_name) {
+                                pos = i + 1;
+                                break;
+                            }
                         }
-                        if(datos.length > 1) {
-                            $('#second_person').html(datos[1].full_name);
-                            $('#second_person').attr('title', datos[1].rank_score + ' punts');
-                        } else {
-                            $('#second_person').html('----------------------');
-                        }
-                        if(datos.length > 2) {
-                           $('#third_person').html(datos[2].full_name);
-                           $('#third_person').attr('title', datos[2].rank_score + ' punts');
-                        } else {
-                            $('#third_person').html('----------------------');
-                        }
-
-                        // find yourself in the list (which is your pos)?
-                        var i=0;
-                        var found = false;
-                        var len = datos.length;
-                        while(i<len && !found) {
-                            if(pageInfo.userFullname == datos[i].full_name) {
-                                found = true;
-                            } 
-                            i += 1;
-                        }
-                        if(found && i > 3) {
-                            $('#you_person').html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Estàs en posició ' + i + 'a.');
+                        if (pos > 3 && you) {
+                            you.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Estàs en posició ' + pos + 'a.';
+                        } else if (you) {
+                            you.innerHTML = '';
                         }
 
                     } else {
                         console.error(datos);
                     }
-                },
-                error: function(err) {
+                })
+                .catch(function (err) {
                     console.error(err);
-                }
-            });
-
+                });
         },
+
         onGameStart: function (ev) {
-            var _ = Memory;
-            // start crono
+            var self = this;
             if (cronoInterval != null) {
                 clearInterval(cronoInterval);
             }
-            _.seconds = 0;
+            this.seconds = 0;
             cronoInterval = window.setInterval(function () {
-                _.seconds += 1;
-                var totalSeconds = _.seconds;
+                self.seconds += 1;
+                var totalSeconds = self.seconds;
                 var hours = Math.floor(totalSeconds / 3600);
                 totalSeconds %= 3600;
                 var minutes = Math.floor(totalSeconds / 60);
                 var seconds = totalSeconds % 60;
-                $crono.html(pad2(hours) + ":" + pad2(minutes) + ":" + pad2(seconds));
+                if (cronoEl) cronoEl.innerHTML = pad2(hours) + ":" + pad2(minutes) + ":" + pad2(seconds);
             }, 1000);
-            //uncover all cards
-            _.$startButton.hide();
-            $(".carta > .inside.picked").removeClass('picked');
-            _.playing = true;
-            _.$restartButton.show();
-        },
-        reset: function (ev) {
-            var _ = Memory;
-            _.$restartButton.hide();
-            _.$startButton.show();
-            // Stop timer if possible
-            if (cronoInterval != null) {
-                clearInterval(cronoInterval);
+
+            if (this.startButton) this.startButton.style.display = 'none';
+            var pickedEls = document.querySelectorAll(".carta > .inside.picked");
+            for (var i = 0; i < pickedEls.length; i++) {
+                pickedEls[i].classList.remove('picked');
             }
-            _.seconds = 0;
-            turns = 0;
-            $crono.html("");
-            $girs.html("&nbsp;" + turns + "&nbsp;");
+            this.playing = true;
+            if (this.restartButton) this.restartButton.style.display = 'block';
+        },
+
+        reset: function (ev) {
             if (ev && ev.preventDefault) {
                 ev.preventDefault();
             }
-            //$('#exampleModal').modal('hide');
-            this.shuffleCards(this.cardsArray);
+            if (this.restartButton) this.restartButton.style.display = 'none';
+            if (this.startButton) this.startButton.style.display = 'block';
+
+            if (cronoInterval != null) {
+                clearInterval(cronoInterval);
+            }
+            this.seconds = 0;
+            turns = 0;
+            if (cronoEl) cronoEl.innerHTML = "";
+            if (girsEl) girsEl.innerHTML = "&nbsp;" + turns + "&nbsp;";
+
+            this.shuffleCards();
             this.setup();
-            this.$game.show("slow");
+
+            if (this.gameEl) {
+                this.gameEl.style.display = 'block';
+                // Note: jQuery's "slow" show isn't perfectly matched, but display block is the functional part.
+            }
         },
 
-        // Fisher--Yates Algorithm -- https://bost.ocks.org/mike/shuffle/
         shuffle: function (array) {
             var counter = array.length, temp, index;
-            // While there are elements in the array
             while (counter > 0) {
-                // Pick a random index
                 index = Math.floor(Math.random() * counter);
-                // Decrease counter by 1
                 counter--;
-                // And swap the last element with it
                 temp = array[counter];
                 array[counter] = array[index];
                 array[index] = temp;
@@ -323,15 +395,16 @@
 
         buildHTML: function () {
             turns = 0;
-            $girs.html("&nbsp;" + turns + "&nbsp;");
+            if (girsEl) girsEl.innerHTML = "&nbsp;" + turns + "&nbsp;";
             var frag = '';
-            this.$cards.each(function (k, v) {
+            for (var i = 0; i < this.cardsArray.length; i++) {
+                var v = this.cardsArray[i];
                 frag += '<div class="carta" data-id="' + v.id + '"><div class="inside picked">\
                <div class="back">'+ v.desc + '</div>\
-               <div class="front"><img src="https://piworld.es/iedib/img/IEDIB.png"\
+               <div class="front"><img src="https://ibsuite.es/iedib/img/IEDIB.png"\
                alt="IEDIB" /></div></div>\
                </div>';
-            });
+            }
             return frag;
         }
     };
@@ -371,7 +444,7 @@
         },
         {
             id: 4,
-            desc: '<img src="https://piworld.es/iedib/img/flipcards/fp0001.png" style="width:95%;margin-top:-22px;">'
+            desc: '<img src="https://ibsuite.es/iedib/img/flipcards/fp0001.png" style="width:95%;margin-top:-22px;">'
         },
         {
             id: 5,
@@ -380,7 +453,7 @@
         },
         {
             id: 5,
-            desc: '<img src="https://piworld.es/iedib/img/flipcards/fp0002.png" style="width:95%;margin-top:-22px;">'
+            desc: '<img src="https://ibsuite.es/iedib/img/flipcards/fp0002.png" style="width:95%;margin-top:-22px;">'
         },
         {
             id: 6,
@@ -394,7 +467,7 @@
         {
             id: 7,
             desc: "Un vector perpendicular al segment d'extrems " + bl + "A=(3,-2)" + el + " i " + bl + "B=(2,-1)" + el,
-            feed: "En primer lloc determinam el vector fix " + bl + "\\vec{AB}=(-1,1)" + el + " que serà el vector director del segment. Per trobar un vector perpendicular a aquest, giram l'ordre de les components i canviam un únic signe."
+            feed: "En primer lloc determinam el vector fix " + bl + "\\vec{AB}=(-1,1)" + el + " que serà el vector director del segment. Per trobar un vector perpendicular a aquest, giram l'ordre de les components i canviam un único signe."
         },
         {
             id: 7,
@@ -447,8 +520,19 @@
         }
     ];
 
+    // Add bind pattern and guard
+    window.IB = window.IB || {};
+    window.IB.sd = window.IB.sd || {};
+    window.IB.sd.flipcards = {
+        bind: function () {
+            var gameEl = document.querySelector(".fc_game");
+            if (gameEl && !gameEl.getAttribute('data-active')) {
+                gameEl.setAttribute('data-active', '1');
+                Memory.init(cards);
+            }
+        }
+    };
 
-    Memory.init(cards);
-
+    window.IB.sd.flipcards.bind();
 
 })();

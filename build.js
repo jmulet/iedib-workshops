@@ -18,6 +18,7 @@ console.log(`> src=${src}`)
 console.log(`> dst=${dst}`)
 console.log(" ")
 
+const ignoreAllBundle = ["flipcards.js"];
 // ALL bundle must ensure this order
 const precedences = ['overlay.js', 'iapace.js', 'sections.js', 'tiles.js', 'confetti.js', 'smartquizz.js', 'aos.js', 'ibparallax.js'];
 
@@ -61,11 +62,13 @@ fs.readdirSync(src).forEach((file) => {
     } else if (result.warnings) {
         console.log(result.warnings)
     }
-    const indx = precedences.indexOf(file)
-    if (indx >= 0) {
-        all[indx] = result.code
-    } else {
-        all.push(result.code)
+    if (!ignoreAllBundle.includes(file)) {
+        const indx = precedences.indexOf(file)
+        if (indx >= 0) {
+            all[indx] = result.code
+        } else {
+            all.push(result.code)
+        }
     }
 
     let code = result.code;
@@ -75,7 +78,9 @@ fs.readdirSync(src).forEach((file) => {
         let local_css = fs.readFileSync(path.join(src, file.replace(".js", ".css")), "utf8");
         local_css = local_css.replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\n/g, ' ').replace(/\t/g, ' ').replace(/  /g, ' ').replace(/5 Free/g, '5 Pro');
         catObj.css.push(local_css);
-        allcss += " " + local_css;
+        if (!ignoreAllBundle.includes(file)) {
+            allcss += " " + local_css;
+        }
 
         // add css
         code = ` 
