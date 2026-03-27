@@ -126,3 +126,27 @@ ul[role="tiles"] > li > h3::before {
     background: #3d5c95; 
     border-radius: 2px;
 }
+
+@media print {
+  /* Hide the interactive panel during print */
+  .pw-tiles-panel {
+    display: none !important;
+  }
+  
+  /* Force all content sections to be visible */
+  ul[role="tiles"] > li {
+    display: block !important;
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    padding: 0 !important;
+    margin-bottom: 2rem;
+    page-break-inside: avoid;
+  }
+
+  ul[role="tiles"] > li > h3 {
+    border-bottom: 2px solid #ccc;
+    font-size: 1.5rem;
+    margin-top: 2rem;
+  }
+}
