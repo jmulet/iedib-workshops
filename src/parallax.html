@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ca">
+
+<head>
+    <meta charset="utf8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IBParallax – Exemples acadèmics</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <link rel="stylesheet" href="./ibparallax.css">
+    <script>window.IB = { sd: {} };</script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            background: #fafafa;
+        }
+
+        h2.area-title {
+            font-family: Arial, sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #888;
+            margin-bottom: 0.3rem;
+            margin-top: 3rem;
+        }
+
+        h3.topic-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        /* IBParallax Core base styles */
+        [data-snptd="parallax"] {
+            position: relative;
+            overflow: hidden;
+        }
+
+        [data-snptd="parallax"] [data-depth],
+        [data-snptd="parallax"] [data-parallax-layer] {
+            position: absolute;
+            user-select: none;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+
+        /* Fallback stàtic per a reduced-motion i impressió */
+        [data-snptd="parallax"] [data-parallax-static] {
+            display: none;
+        }
+
+        @media (prefers-reduced-motion: reduce),
+        print {
+            [data-snptd="parallax"]:has([data-parallax-static]) {
+                height: auto !important;
+            }
+
+            [data-snptd="parallax"]:has([data-parallax-static]) [data-depth],
+            [data-snptd="parallax"]:has([data-parallax-static]) [data-parallax-layer] {
+                display: none !important;
+            }
+
+            [data-snptd="parallax"] [data-parallax-static] {
+                display: block !important;
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container py-5">
+        <h1 class="display-4 font-weight-bold mb-2">IBParallax</h1>
+        <p class="lead text-muted mb-5">Exemples acadèmics que combinen efectes de <strong>depth</strong>,
+            <strong>zoom</strong>, <strong>fade</strong>, <strong>offset</strong> i <strong>cover</strong>.
+        </p>
+
+        <!-- ===================================================
+         1. BIOLOGIA  · ADN  
+         scroll + zoom-out background + fade-in text
+    ==================================================== -->
+        <h2 class="area-title">Biologia</h2>
+        <h3 class="topic-title">L'hèlix de la vida</h3>
+        <p>L'ADN és la molècula que conté totes les instruccions genètiques d'un organisme. La seva estructura de doble
+            hèlix, descoberta el 1953, ha revolucionat la medicina i la biologia moderna.</p>
+
+        <div data-snptd="parallax" class="mx-auto my-4 rounded-lg shadow" style="aspect-ratio: 3/1; max-height: 350px;"
+            data-parallax-mode="scroll" data-parallax-direction="y" data-parallax-start="20" data-parallax-end="80">
+
+            <!-- Fons: zoom-out mentre puja -->
+            <img data-depth="0.2" data-parallax-fit="cover-80" data-parallax-zoom="1.25,1"
+                src="https://ibsuite.es/iedib/sample/dna.jpg">
+
+            <div data-parallax-layer
+                style="inset:0; background:linear-gradient(to right, rgba(0,0,0,0.7) 30%, transparent); z-index:2;">
+            </div>
+
+            <div data-parallax-layer data-parallax-fade="0.75,1" data-parallax-offset="0,-20"
+                style="z-index:3; top:20%; left:5%; color:white; font-family:sans-serif;">
+                <div style="font-size:0.85rem; letter-spacing:3px; text-transform:uppercase; opacity:0.7;">Biologia ·
+                    Genètica</div>
+                <div style="font-size:2rem; font-weight:800; line-height:1.2;">L'Estructura de l'ADN</div>
+            </div>
+
+            <div data-parallax-layer data-parallax-fade="0.75,0.25" data-parallax-offset="20,0"
+                style="z-index:3; bottom:15%; right:5%; color:white; font-family:sans-serif; text-align:right; font-size:0.85rem; opacity:0.8;">
+                3.200 milions<br>de parells de bases
+            </div>
+        </div>
+
+        <p>La seqüència de les quatre bases (A, T, C, G) determina el codi genètic. Els avenços en seqüenciació permeten
+            identificar mutacions responsables de malalties i, en el futur, podrien permetre teràpies personalitzades.
+        </p>
+
+
+        <!-- ===================================================
+         2. ASTRONOMIA  · Sistema Solar
+         scroll multi-layer + mouse hover + zoom estreles
+    ==================================================== -->
+        <h2 class="area-title">Astronomia</h2>
+        <h3 class="topic-title">Força gravitatòria</h3>
+        <p>La gravetat és la força que manté els planetes en òrbita, les galàxies unides i fins i tot la forma de
+            l'univers tal com el coneixem. Isaac Newton va formalitzar la llei de la gravitació universal el 1687.</p>
+
+        <div data-snptd="parallax" class="mx-auto my-4 rounded-lg shadow"
+            style="aspect-ratio: 2/1; max-width: 650px; background:#000;" data-parallax-mode="both"
+            data-parallax-direction="both" data-parallax-start="20" data-parallax-end="80">
+
+            <img data-depth="0.04" data-parallax-fit="cover-40" data-parallax-zoom="1,1.06" style="opacity:0.9;"
+                src="https://ibsuite.es/iedib/sample/stars.png">
+
+            <img data-depth="0.12"
+                style="z-index:3; bottom:60px; right:50px; width:110px; opacity:0.85; filter:drop-shadow(0 0 12px rgba(255,200,100,0.5));"
+                src="https://ibsuite.es/iedib/sample/saturn.png">
+
+            <img data-depth="0.45" style="z-index:4; bottom:-5px; left:55px; width:120px;"
+                src="https://ibsuite.es/iedib/sample/rocket.png">
+
+            <div data-depth="-0.04" data-parallax-fit="center" data-parallax-fade="0.75,1" style="z-index:5; color:white; font-family:sans-serif; font-size:1.8rem; font-weight:800;
+                   text-shadow:0 0 20px rgba(150,200,255,0.8); white-space:nowrap; pointer-events:none;">
+                Força Gravitatòria
+            </div>
+        </div>
+
+        <p>La força gravitatòria entre dos cossos és directament proporcional al producte de les seves masses i
+            inversament proporcional al quadrat de la distància que els separa: <em>F = G·m₁·m₂/r²</em>.</p>
+
+
+        <!-- ===================================================
+         3. MATEMÀTIQUES  · Geometria
+         scroll + fade layers sobre gradient + zoom-in
+        ==================================================== -->
+        <h2 class="area-title">Matemàtiques</h2>
+        <h3 class="topic-title">Geometria de l'espai</h3>
+        <p>La geometria estudia les formes, mides i propietats de les figures en l'espai. Des dels axiomes d'Euclides
+            fins a les geometries no euclidianes de Riemann, el seu impacte en física i enginyeria és fonamental.</p>
+
+        <div data-snptd="parallax" class="mx-auto my-4 rounded-lg shadow"
+            style="aspect-ratio: 3/1; max-height: 300px; background: linear-gradient(135deg, #0d0d1a 0%, #12124a 50%, #0a0a30 100%);"
+            data-parallax-mode="both" data-parallax-direction="both" data-parallax-start="15" data-parallax-end="85"
+            data-parallax-animdir="revert">
+
+            <!-- Cercle gran: moviment pronunciat cap amunt + zoom contraposat -->
+            <div data-depth="0.55" data-parallax-zoom="0.7,1.2" style="z-index:1; width:340px; height:340px; border-radius:50%;
+                       border: 2px solid rgba(120,200,255,0.25); top:-120px; left:-80px;"></div>
+
+            <!-- Cercle mig: capa independent, velocitat diferent -->
+            <div data-depth="0.3" data-parallax-zoom="1,0.8" style="z-index:2; width:200px; height:200px; border-radius:50%;
+                       border: 1px solid rgba(120,200,255,0.4); top:-40px; left:-20px;
+                       box-shadow: inset 0 0 30px rgba(80,150,255,0.1);"></div>
+
+            <!-- Punt brillant intersecció: capa ràpida + zoom-in -->
+            <div data-depth="0.7" data-parallax-zoom="0.5,1.5" data-parallax-fade="0.2,1" style="z-index:3; width:16px; height:16px; border-radius:50%;
+                       background: radial-gradient(circle, white, rgba(100,200,255,0.6));
+                       box-shadow: 0 0 20px rgba(100,200,255,0.8); top:40px; left:60px;"></div>
+
+            <!-- Línies de graella: fan offset cap a l'esquerra -->
+            <div data-parallax-layer data-parallax-offset="-40,0" data-parallax-fade="0.1,0.6"
+                style="inset:0; z-index:1;
+                       background: repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(100,180,255,0.06) 40px, rgba(100,180,255,0.06) 41px),
+                                   repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(100,180,255,0.06) 40px, rgba(100,180,255,0.06) 41px);"></div>
+
+            <!-- Text principal: entra per l'esquerra fent fade -->
+            <div data-parallax-layer data-parallax-fade="in" data-parallax-offset="-50,0"
+                style="z-index:5; left:40%; top:50%; transform:translateY(-50%); color:white; font-family:sans-serif;">
+                <div
+                    style="font-size:0.7rem; letter-spacing:3px; text-transform:uppercase; color:rgba(100,200,255,0.7);">
+                    Matemàtiques · Teorema</div>
+                <div style="font-size:1.8rem; font-weight:800; margin-top:4px;">a² + b² = c²</div>
+                <div style="font-size:0.85rem; color:rgba(255,255,255,0.5); margin-top:4px;">Teorema de Pitàgores</div>
+            </div>
+
+            <!-- Fórmules secundàries: fan offset contrari (dreta→) i desapareixen -->
+            <div data-parallax-layer data-parallax-fade="out" data-parallax-offset="40,0"
+                style="z-index:5; right:3%; top:50%; transform:translateY(-50%);
+                       color:rgba(150,210,255,0.6); font-family:monospace; font-size:0.8rem; text-align:right; line-height:2;">
+                sin²θ + cos²θ = 1<br>
+                e<sup>iπ</sup> + 1 = 0<br>
+                A = π·r²
+            </div>
+        </div>
+
+        <p>El teorema de Pitàgores estableix que en un triangle rectangle, el quadrat de la hipotenusa és igual a la
+            suma dels quadrats dels catets. Aquest resultat, conegut des de l'antiguitat, és la base de la trigonometria
+            i el càlcul vectorial.</p>
+
+
+
+        <!-- ===================================================
+             4. CINEMA · Travelling (push-in)
+             Fons real amb zoom-in. 1r pla SVG FIXAT (sense data-depth).
+        ==================================================== -->
+        <h2 class="area-title">Llengua &amp; Arts</h2>
+        <h3 class="topic-title">El travelling al cinema</h3>
+        <p>El <em>travelling</em> és un moviment de càmera que s'aproxima físicament al subjecte. El fons s'acosta
+            progressivament mentre les figures del primer pla queden fixes, creant una sensació de profunditat
+            inigualable. Al contrari del zoom òptic, preserva la perspectiva natural.</p>
+
+
+        <p>Cineastes com Stanley Kubrick o Alfonso Cuarón han fet del travelling una eina expressiva fonamental.
+            Un push-in lent sobre un personatge transmet tensió psicològica; un pull-out revela l'entorn i la solitud.
+            La càmera no tan sols enregistra: també narra.</p>
+
+
+        <!-- Add parallax for backboard.png and einstein.png in the first plane -->
+        <div data-snptd="parallax" class="mx-auto my-4 rounded-lg shadow"
+            style="aspect-ratio: 2/1; max-height: 300px; background: #050518;" data-parallax-mode="scroll"
+            data-parallax-direction="both" data-parallax-start="5" data-parallax-end="95">
+
+            <img src="https://ibsuite.es/iedib/sample/blackboard.jpg" data-depth="-0.1" data-parallax-zoom="1.4,1.1"
+                style="z-index:1; inset:0; width: 110%;">
+            <img src="https://ibsuite.es/iedib/sample/einstein.png"
+                style="z-index:2; width: 44%; bottom: 0; left: 0; position: absolute;">
+
+        </div>
+
+
+        <!-- 6. SPLIT IMAGE -->
+        <h2 class="area-title">Medi Ambient &amp; Efecte Visual</h2>
+        <h3 class="topic-title">Split Image: dues realitats</h3>
+        <p>L'efecte <em>split image</em> divideix dues imatges en meitats que es separen en fer scroll, revelant un
+            missatge amagat al fons.</p>
+
+        <div data-snptd="parallax" class="mx-auto my-4 shadow"
+            style="aspect-ratio: 21/9; max-height: 300px; background: #050f05;" data-parallax-mode="scroll"
+            data-parallax-direction="y" data-parallax-start="45" data-parallax-end="95">
+
+            <div data-parallax-layer data-parallax-fade="0,1"
+                style="inset:0; z-index:1; background: radial-gradient(ellipse at center, #1a3a22, #050f05); display:flex; align-items:center; justify-content:center;">
+                <div
+                    style="color:#6aff8a; font-family:monospace; text-align:center; text-shadow:0 0 25px rgba(100,255,130,0.7);">
+                    <div style="font-size:1.5rem; font-weight:800; letter-spacing:2px;">NATURA vs. IND&Uacute;STRIA
+                    </div>
+                    <div style="font-size:0.8rem; opacity:0.7; letter-spacing:5px; margin-top:6px;">UN SOL PLANETA</div>
+                </div>
+            </div>
+
+            <div data-parallax-layer data-parallax-fade="0,0.9"
+                style="z-index:4; top:0; left:calc(50% - 1px); width:2px; height:100%;
+                       background:linear-gradient(to bottom, transparent, rgba(200,255,200,0.9), transparent); pointer-events:none;"></div>
+
+            <img data-depth="0" data-parallax-offset="-660,0"
+                style="top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:3; clip-path:polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%);"
+                src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=80">
+
+            <img data-depth="0" data-parallax-offset="660,0"
+                style="top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:3; clip-path:polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%);"
+                src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1200&q=80">
+        </div>
+
+        <p>La clau: el <code>clip-path</code> es transforma solidàriament amb el <code>transform</code>. Amb
+            <code>data-parallax-offset</code> en direccions oposades, les dues meitats s'allunyen simètricament revelant
+            el fons.
+        </p>
+
+        <h2 class="area-title">Accessibilitat</h2>
+        <h3 class="topic-title">Disseny inclusiu i preferència de moviment</h3>
+        <p>Aquest exemple incorpora la tècnica de <em>Reduced Motion</em>. Si el sistema de l'usuari té habilitada la
+            reducció de moviment (o si imprimim aquesta pàgina), el component amagarà les capes animades i mostrarà
+            una imatge estàtica alternativa específica.</p>
+
+        <div data-snptd="parallax" class="mx-auto my-4 rounded-lg shadow"
+            style="aspect-ratio: 21/9; max-height: 250px; background: #222;" data-parallax-mode="scroll"
+            data-parallax-start="10" data-parallax-end="90">
+
+            <!-- Capes animades (només visibles si no hi ha reduced-motion) -->
+            <img data-depth="0.1" data-parallax-fit="cover-20"
+                src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200">
+            <div data-depth="0.3" data-parallax-fade="in"
+                style="z-index:5; width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:white; font-size:2rem; font-weight:800; text-shadow:0 0 10px black;">
+                EXPLORACI&Oacute; DIGITAL
+            </div>
+
+            <!-- Imatge estàtica alternativa (fallback per a impressió / reduced motion) -->
+            <img data-parallax-static src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200"
+                style="object-fit: cover;">
+        </div>
+
+        <p>Aquesta pràctica és essencial per complir amb les pautes d'accessibilitat (WCAG) i per oferir una versió de
+            qualitat per a impressió.</p>
+    </div>
+
+    <script src="./ibparallax.js"></script>
+</body>
+
+</html>
