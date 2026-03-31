@@ -1,0 +1,36 @@
+   /* IBParallax Core base styles */
+   [data-snptd="parallax"] {
+       position: relative;
+       overflow: hidden;
+   }
+
+   [data-snptd="parallax"] [data-depth],
+   [data-snptd="parallax"] [data-parallax-layer] {
+       position: absolute;
+       user-select: none;
+       pointer-events: none;
+       will-change: transform, opacity;
+   }
+
+   /* Fallback stàtic per a reduced-motion i impressió */
+   [data-snptd="parallax"] [data-parallax-static] {
+       display: none;
+   }
+
+   @media (prefers-reduced-motion: reduce),
+   print {
+       [data-snptd="parallax"]:has([data-parallax-static]) {
+           height: auto !important;
+       }
+
+       [data-snptd="parallax"]:has([data-parallax-static]) [data-depth],
+       [data-snptd="parallax"]:has([data-parallax-static]) [data-parallax-layer] {
+           display: none !important;
+       }
+
+       [data-snptd="parallax"] [data-parallax-static] {
+           display: block !important;
+           width: 100%;
+           height: auto;
+       }
+   }

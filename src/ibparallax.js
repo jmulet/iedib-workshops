@@ -7,7 +7,7 @@
  * 
  * En el CONTENEDOR principal [data-snptd="parallax"]:
  *  - data-snptd="parallax"        : Identificador para auto-activación.
-  *  - data-scroll-depth="300"      : Intensidad del efecto de scroll (Default: 300).
+ *  - data-scroll-depth="300"      : Intensidad del efecto de scroll (Default: 300).
  *  - data-parallax-start="0"     : % del viewport desde el tope para el punto de reposo (factor 0).
  *  - data-parallax-end="100"         : % del viewport desde el tope para el desplazamiento máximo (factor 1).
  *  - data-parallax-clamp="true"   : Si es "true" (default), mantiene los límites 0 y 1 fuera del rango definido.
@@ -28,6 +28,9 @@
  *  - data-parallax-offset="x,y"   : Desplazamiento adicional en px al completar la animación.
  *                                  Se aplica como delta proporcional al scrollFactor.
  *                                  Ex: "0,50" sube 50px extra al llegar al final.
+ *  - data-parallax-animdir="revert" : Invierte la dirección de la animación.
+ *  - data-parallax-scrub="500"    : (Pinning) El contenedor se vuelve sticky durante X px de scroll.
+ *  - data-parallax-range="0.2,0.5": (Layer only) Mapea el efecto a un sub-rango del scroll factor (0 a 1).
  * 
  * --- EJEMPLOS ---
  * 
@@ -68,6 +71,29 @@ window.IBParallax = (function () {
         var clamp = container.getAttribute('data-parallax-clamp') !== 'false'; // Default true for trigger logic
         var from = container.getAttribute('data-parallax-from') || 'center';
         var reverse = container.getAttribute('data-parallax-animdir') === 'revert' || container.getAttribute('data-animdir') === 'revert';
+        var scrubAttr = container.getAttribute('data-parallax-scrub');
+        var isScrubMode = scrubAttr !== null;
+        var scrubDepth = parseInt(scrubAttr) || 500;
+        var spacer = null;
+
+        if (isScrubMode) {
+            // Envolvemos en un espaciador para asegurar que el scroll tenga "pista"
+            // y que los márgenes no dependan de layouts externos
+            spacer = document.createElement('div');
+            spacer.className = 'ibparallax-scrub-spacer';
+            spacer.style.height = (container.offsetHeight + scrubDepth) + 'px';
+            spacer.style.position = 'relative';
+            spacer.style.width = '100%';
+            
+            container.parentNode.insertBefore(spacer, container);
+            spacer.appendChild(container);
+
+            container.style.position = 'sticky';
+            // Calculamos el top para centrarlo exactamente sin usar translateY(-50%)
+            var centerTop = (window.innerHeight - container.offsetHeight) / 2;
+            container.style.top = centerTop + 'px';
+            container.style.zIndex = '10';
+        }
 
         var layers = container.querySelectorAll('[data-depth], [data-parallax-layer]');
 
@@ -155,6 +181,16 @@ window.IBParallax = (function () {
                 var layerReverse = l.getAttribute('data-parallax-animdir') === 'revert' || l.getAttribute('data-animdir') === 'revert';
                 if (layerReverse) sf = 1 - sf;
 
+                // Soporte para SUB-RANGOS (data-parallax-range="0.2,0.5")
+                var rangeAttr = l.getAttribute('data-parallax-range');
+                if (rangeAttr) {
+                    var rp = rangeAttr.split(',');
+                    var rs = parseFloat(rp[0]) || 0;
+                    var re = parseFloat(rp[1]) || 1;
+                    sf = (sf - rs) / (re - rs);
+                    sf = Math.max(0, Math.min(1, sf));
+                }
+
                 // Zoom
                 var scaleVal = 1;
                 var zoomAttr = l.getAttribute('data-parallax-zoom');
@@ -226,17 +262,28 @@ window.IBParallax = (function () {
                 var rect = container.getBoundingClientRect();
                 var viewportHeight = window.innerHeight;
 
-                // Solo calculamos si el contenedor está cerca del área visible (2 vh por arriba y 1 vh por debajo)
+                // Solo calculamos si el contenedor está cerca del área visible
                 if (rect.top < viewportHeight * 2 && rect.bottom > -viewportHeight) {
-                    var sPx = viewportHeight * (start / 100);
-                    var ePx = viewportHeight * (end / 100);
-                    var range = ePx - sPx;
+                    var factor = 0;
 
-                    var ref = rect.top;
-                    if (from === 'center') ref += rect.height / 2;
-                    if (from === 'bottom') ref += rect.height;
+                    if (isScrubMode) {
+                        // Usamos la posición del spacer (su bloque de layout real) para calcular progreso
+                        var sRect = spacer.getBoundingClientRect();
+                        // El scrub empieza cuando el tope del spacer entra o el centro del contenedor llega al sticky
+                        // Como hemos centrado el contenedor, el scrub empieza a mitad del spacer
+                        var startPin = sRect.top; // El inicio del spacer
+                        factor = -startPin / scrubDepth;
+                    } else {
+                        var sPx = viewportHeight * (start / 100);
+                        var ePx = viewportHeight * (end / 100);
+                        var range = ePx - sPx;
 
-                    var factor = (Math.abs(range) > 0.001) ? (ref - sPx) / range : 0;
+                        var ref = rect.top;
+                        if (from === 'center') ref += rect.height / 2;
+                        if (from === 'bottom') ref += rect.height;
+
+                        factor = (Math.abs(range) > 0.001) ? (ref - sPx) / range : 0;
+                    }
 
                     if (clamp) {
                         factor = Math.max(0, Math.min(1, factor));

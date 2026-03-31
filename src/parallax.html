@@ -31,44 +31,8 @@
             font-weight: 700;
             margin-bottom: 1rem;
         }
-
-        /* IBParallax Core base styles */
-        [data-snptd="parallax"] {
-            position: relative;
-            overflow: hidden;
-        }
-
-        [data-snptd="parallax"] [data-depth],
-        [data-snptd="parallax"] [data-parallax-layer] {
-            position: absolute;
-            user-select: none;
-            pointer-events: none;
-            will-change: transform, opacity;
-        }
-
-        /* Fallback stàtic per a reduced-motion i impressió */
-        [data-snptd="parallax"] [data-parallax-static] {
-            display: none;
-        }
-
-        @media (prefers-reduced-motion: reduce),
-        print {
-            [data-snptd="parallax"]:has([data-parallax-static]) {
-                height: auto !important;
-            }
-
-            [data-snptd="parallax"]:has([data-parallax-static]) [data-depth],
-            [data-snptd="parallax"]:has([data-parallax-static]) [data-parallax-layer] {
-                display: none !important;
-            }
-
-            [data-snptd="parallax"] [data-parallax-static] {
-                display: block !important;
-                width: 100%;
-                height: auto;
-            }
-        }
     </style>
+    <link rel="stylesheet" href="./ibparallax.css">
 </head>
 
 <body>
@@ -275,6 +239,49 @@
             <code>data-parallax-offset</code> en direccions oposades, les dues meitats s'allunyen simètricament revelant
             el fons.
         </p>
+
+        <!-- ===================================================
+             5. SCRUB · Efecte Ancorat
+             El contenidor es queda fix al centre mentre es fa scroll.
+        ==================================================== -->
+        <h2 class="area-title">Narrativa Visual</h2>
+        <h3 class="topic-title">Scrubbing: Ancoratge de contingut</h3>
+        <p>Amb l'atribut <code>data-parallax-scrub="800"</code>, el contenidor es queda ancorat (sticky) al centre
+            del viewport durant 800 píxels de scroll. Això permet crear una experiència narrativa on l'animació de les
+            capes és el focus principal de l'usuari mentre continua fent scroll.</p>
+
+        <div data-snptd="parallax" data-parallax-scrub="2000" class="mx-auto my-4 rounded-lg shadow"
+            style="aspect-ratio: 16/9; max-height: 600px; background: radial-gradient(circle, #1a1a2e 0%, #0d0d1a 100%);">
+
+            <!-- Capa 1: Nucli (Base) -->
+            <img data-depth="0" data-parallax-fit="cover-5" src="https://ibsuite.es/iedib/sample/terra1.png"
+                style="z-index: 1;">
+
+            <!-- Capa 2: Mantell Inferior (0% a 25%) -->
+            <img data-depth="0" data-parallax-fit="cover-5" data-parallax-range="0,0.25" data-parallax-fade="in"
+                src="https://ibsuite.es/iedib/sample/terra2.png" style="z-index: 2;">
+
+            <!-- Capa 3: Mantell Superior (25% a 50%) -->
+            <img data-depth="0" data-parallax-fit="cover-5" data-parallax-range="0.25,0.5" data-parallax-fade="in"
+                src="https://ibsuite.es/iedib/sample/terra3.png" style="z-index: 3;">
+
+            <!-- Capa 4: Crosta (50% a 75%) -->
+            <img data-depth="0" data-parallax-fit="cover-5" data-parallax-range="0.5,0.75" data-parallax-fade="in"
+                src="https://ibsuite.es/iedib/sample/terra4.png" style="z-index: 4;">
+
+            <!-- Capa 5: Superfície/Atmosfera (75% a 100%) -->
+            <img data-depth="0" data-parallax-fit="cover-5" data-parallax-range="0.75,1" data-parallax-fade="in"
+                src="https://ibsuite.es/iedib/sample/terra5.png" style="z-index: 5;">
+
+
+        </div>
+
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod. Lorem ipsum dolor, sit amet
+            consectetur adipisicing elit. In, nemo facere! Nobis obcaecati, unde in tempore magni ipsum et placeat
+            earum necessitatibus ullam. Illo expedita incidunt debitis impedit mollitia beatae?</p>
+
+        <p>Aquest efecte és ideal per a seccions d'impacte on vols que l'usuari "visqui" l'animació a la seva pròpia
+            velocitat de scroll.</p>
 
         <h2 class="area-title">Accessibilitat</h2>
         <h3 class="topic-title">Disseny inclusiu i preferència de moviment</h3>
