@@ -31,10 +31,38 @@ const categories = {
     "general": { code: [], css: [] }
 };
 
+const { execSync } = require("child_process");
+const fetchCache = {};
+
+function fetchUrl(url) {
+    if (fetchCache[url]) return fetchCache[url];
+    console.log("  > Fetching dependency: " + url);
+    try {
+        const content = execSync(`curl -sL "${url}"`, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 5 });
+        fetchCache[url] = content;
+        return content;
+    } catch (e) {
+        console.error("  ! Error fetching " + url);
+        return "";
+    }
+}
+
 fs.readdirSync(src).forEach((file) => {
     if (path.extname(file) != ".js") {
         return
     }
+
+    const srcPath = path.join(src, file);
+    const srcCode = fs.readFileSync(srcPath, "utf8");
+
+    // Process // @require directives
+    const requireLines = srcCode.match(/\/\/ @require\s+(.+)/g) || [];
+    let bundledDeps = "";
+    requireLines.forEach(line => {
+        const url = line.replace("// @require", "").trim();
+        bundledDeps += fetchUrl(url) + "\n";
+    });
+
     // look for category in presets
     const presetFile = path.join("presets", "dynamic_" + file.replace(".js", ".yaml"));
     let currentCat = "general";
@@ -54,7 +82,9 @@ fs.readdirSync(src).forEach((file) => {
         catObj = { code: [], css: [] };
         categories[currentCat] = catObj;
     }
-    const result = UglifyJS.minify(path.join(src, file), options)
+
+    // Minify source (without deps to avoid double-minification and potential errors)
+    const result = UglifyJS.minify(srcCode, { fromString: true, ...options });
 
     if (result.error) {
         console.error(result.error)
@@ -62,19 +92,21 @@ fs.readdirSync(src).forEach((file) => {
     } else if (result.warnings) {
         console.log(result.warnings)
     }
+
+    let code = bundledDeps + result.code;
+
     if (!ignoreAllBundle.includes(file)) {
         const indx = precedences.indexOf(file)
         if (indx >= 0) {
-            all[indx] = result.code
+            all[indx] = code
         } else {
-            all.push(result.code)
+            all.push(code)
         }
     }
 
-    let code = result.code;
     catObj.code.push(code);
-    if (fs.existsSync(path.join(src, file.replace(".js", ".css")))) {
 
+    if (fs.existsSync(path.join(src, file.replace(".js", ".css")))) {
         let local_css = fs.readFileSync(path.join(src, file.replace(".js", ".css")), "utf8");
         local_css = local_css.replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\n/g, ' ').replace(/\t/g, ' ').replace(/  /g, ' ').replace(/5 Free/g, '5 Pro');
         catObj.css.push(local_css);
@@ -94,8 +126,6 @@ fs.readdirSync(src).forEach((file) => {
     let target = path.join(dst, file.replace(".js", ".min.js"));
     fs.writeFileSync(target, code, { encoding: 'utf8' });
     console.log("> written " + target);
-
-
 });
 
 
