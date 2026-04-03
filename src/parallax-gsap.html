@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ca">
+
+<head>
+    <meta charset="utf8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IBGSAP – Parallax & Scroll Storytelling</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;800&family=Outfit:wght@400;700;900&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+</head>
+
+<body style="margin:0; padding:0; background-color: white; color: black; font-family: 'Inter', sans-serif;">
+    <div id="main-wrapper" style="max-width: 1000px; margin: 0 auto; padding: 0 1.5rem; overflow-x: hidden;">
+        <header style="padding: 4rem 0 8rem 0; text-align: center;">
+            <h1 style="font-size: clamp(1.8rem, 8vw, 4.2rem);">IBGSAP</h1>
+            <p style="font-size: clamp(0.9rem, 2vw, 1.1rem); color: #444;">
+                La nova evolució del parallax acadèmic. Animacions narratives controlades pel scroll amb la potència de
+                GSAP.
+            </p>
+        </header>
+
+        <div id="scenes-container">
+            <!-- ===================================================
+ 1. BIOLOGIA · ADN
+ ==================================================== -->
+            <section style="margin-bottom: 3rem;">
+                <h3 style="font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 700; margin-bottom: 0.5rem;">Biologia
+                </h3>
+                <h4 style="font-size: clamp(1.1rem, 4vw, 1.8rem); font-weight: 700; margin-bottom: 1rem;">L'hèlix de la
+                    vida</h4>
+                <p style="font-size: clamp(0.9rem, 2vw, 1.1rem); line-height: 1.6;">
+                    L'ADN és la molècula que conté totes les instruccions genètiques d'un organisme.
+                    La seva estructura de doble hèlix ha revolucionat la medicina moderna.
+                </p>
+
+                <div data-gsap-scene class="position-relative w-100 overflow-hidden shadow-lg"
+                    style="aspect-ratio: 21/9; border-radius: 20px; background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.1); margin: 2rem 0;">
+                    <!-- Layers -->
+                    <div class="position-absolute d-flex align-items-center justify-content-center"
+                        style="top:0; left:0; width:100%; height:100%; ">
+                        <img class="dna-bg" src="https://ibsuite.es/iedib/sample/dna.jpg"
+                            style="width:100%; height:100%; object-fit:cover; ">
+                    </div>
+                    <div class="position-absolute"
+                        style="top:0; left:0; width:100%; height:100%; background: linear-gradient(to right, rgba(15, 23, 42, 0.9) 20%, transparent 80%); z-index: 2;">
+                    </div>
+
+                    <div class="position-absolute d-flex align-items-start justify-content-center"
+                        style="top:0; left:0; width:100%; height:100%; z-index: 3; padding: 0 10%; flex-direction: column;">
+                        <div class="dna-text-group" style="color: white !important;">
+                            <div class="text-uppercase small font-weight-bold mb-1" style="letter-spacing:3px;">Biologia
+                                · Genètica</div>
+                            <div class="font-weight-bold m-0"
+                                style="color: white !important; font-size: clamp(1.2rem, 5vw, 2.5rem); line-height: 1.1;">
+                                L'Estructura de l'ADN</div>
+                        </div>
+                    </div>
+
+                    <div class="position-absolute d-flex align-items-end justify-content-end text-right px-5 pb-4"
+                        style="top:0; left:0; width:100%; height:100%; z-index: 3;">
+                        <div class="dna-stat opacity-0" style=" color: white !important;">
+                            <div class="h3 font-weight-bold mb-0"
+                                style="color: white !important; font-size: clamp(1rem, 3vw, 1.8rem);">3.200 M</div>
+                            <div class="small" style="color: rgba(255,255,255,0.7) !important;">parells de bases</div>
+                        </div>
+                    </div>
+
+                    <!-- GSAP Timeline -->
+                    <template data-gsap-timeline>
+                        [
+                        {
+                        "target": ".dna-bg",
+                        "from": {"scale": 1.5, "yPercent": -10},
+                        "to": {"scale": 1.2, "yPercent": 0},
+                        "position": 0
+                        },
+                        {
+                        "target": ".dna-text-group",
+                        "from": {"opacity": 0, "x": -50},
+                        "to": {"opacity": 1, "x": 0},
+                        "position": 0.1
+                        },
+                        {
+                        "target": ".dna-stat",
+                        "from": {"opacity": 0, "y": 20},
+                        "to": {"opacity": 1, "y": 0},
+                        "position": 0.3
+                        }
+                        ]
+                    </template>
+                </div>
+            </section>
+
+            <!-- ===================================================
+ 2. ASTRONOMIA · Gravetat
+ ==================================================== -->
+            <section style="margin-bottom: 3rem;">
+                <h3 style="font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 700; margin-bottom: 0.5rem;">Astronomia
+                </h3>
+                <h4 style="font-size: clamp(1.1rem, 4vw, 1.8rem); font-weight: 700; margin-bottom: 1rem;">Força
+                    gravitatòria</h4>
+                <p style="font-size: clamp(0.9rem, 2vw, 1.1rem); line-height: 1.6;">
+                    La gravetat és la força que manté els planetes en òrbita. Isaac Newton va formalitzar la llei de la
+                    gravitació universal el 1687.
+                </p>
+
+                <div data-gsap-scene data-gsap-scrub="1.5" class="position-relative w-100 overflow-hidden shadow-lg"
+                    style="aspect-ratio: 2/1; border-radius: 20px; background: #000; border: 1px solid rgba(255, 255, 255, 0.1); margin: 2rem 0;">
+
+                    <div class="position-absolute d-flex align-items-center justify-content-center"
+                        style="top:0; left:0; width:100%; height:100%; opacity: 0.6;">
+                        <img class="stars-bg" src="https://ibsuite.es/iedib/sample/stars.png"
+                            style="width:100%; height:100%; object-fit:cover; ">
+                    </div>
+
+                    <div class="position-absolute d-flex align-items-center justify-content-center planet-saturn"
+                        style="top:60%; left:60%; width: 25%; height:auto; ">
+                        <img src="https://ibsuite.es/iedib/sample/saturn.png" class="img-fluid"
+                            style="filter: drop-shadow(0 0 20px rgba(255,200,100,0.3)); ">
+                    </div>
+
+                    <div class="position-absolute d-flex align-items-center justify-content-center rocket"
+                        style="top:60%; left:10%; width: 15%; height:auto; ">
+                        <img src="https://ibsuite.es/iedib/sample/rocket.png" class="img-fluid" style="">
+                    </div>
+
+                    <div class="position-absolute d-flex align-items-center justify-content-center"
+                        style="top:0; left:0; width:100%; height:100%; z-index:10; color: white !important;">
+                        <div class="astro-title font-weight-bold"
+                            style="color: white !important; font-size: clamp(1.4rem, 6vw, 3rem); text-align: center;">
+                            Força Gravitatòria</div>
+                    </div>
+
+                    <template data-gsap-timeline>
+                        [
+                        {
+                        "target": ".planet-saturn",
+                        "from": {"x": 500, "y": -200, "scale": 2, "rotation": -45},
+                        "to": {"x": 0, "y": 0, "scale": 1, "rotation": 0},
+                        "position": 0
+                        },
+                        {
+                        "target": ".rocket",
+                        "from": {"x": -200, "y": 300, "rotation": 45},
+                        "to": {"x": 100, "y": -200, "rotation": 0},
+                        "position": 0
+                        },
+                        {
+                        "target": ".stars-bg",
+                        "to": {"yPercent": -15},
+                        "position": 0
+                        }
+                        ]
+                    </template>
+                </div>
+            </section>
+
+            <!-- ===================================================
+ 3. MATEMÀTIQUES · Pitàgores
+ ==================================================== -->
+            <section style="margin-bottom: 3rem;">
+                <h3 style="font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 700; margin-bottom: 0.5rem;">Matemàtiques
+                </h3>
+                <h4 style="font-size: clamp(1.1rem, 4vw, 1.8rem); font-weight: 700; margin-bottom: 1rem;">Geometria de
+                    l'espai</h4>
+                <p style="font-size: clamp(0.9rem, 2vw, 1.1rem); line-height: 1.6;">
+                    El teorema de Pitàgores estableix que en un triangle rectangle, el quadrat de la hipotenusa és igual
+                    a la suma dels quadrats dels catets.
+                </p>
+
+                <div data-gsap-scene data-gsap-scrub="true" class="position-relative w-100 overflow-hidden shadow-lg"
+                    style="aspect-ratio: 3/1; border-radius: 20px; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border: 1px solid rgba(255, 255, 255, 0.1); margin: 2rem 0;">
+
+                    <div class="position-absolute"
+                        style="top:0; left:0; width:100%; height:100%; background-size: 50px 50px; background-image: linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px);">
+                    </div>
+
+                    <!-- Abstract Shapes -->
+                    <div class="position-absolute d-flex align-items-center justify-content-center circle-1"
+                        style="width: 300px; height: 300px; border: 2px solid rgba(99,102,241,0.3); border-radius: 50%; left: -100px; top: -100px; ">
+                    </div>
+                    <div class="position-absolute d-flex align-items-center justify-content-center circle-2"
+                        style="width: 200px; height: 200px; border: 1px solid rgba(99,102,241,0.2); border-radius: 50%; right: 10%; bottom: -50px; ">
+                    </div>
+
+                    <!-- Main Formula -->
+                    <div class="position-absolute d-flex align-items-center justify-content-start"
+                        style="top:0; left:0; width:100%; height:100%; padding-left: 10%; color: white !important;">
+                        <div class="math-main" style="text-align: left; color: white !important;">
+                            <div class="text-primary small letter-spacing-1">Teorema de Pitàgores</div>
+                            <div class="font-weight-bold"
+                                style="color: white !important; font-size: clamp(1.5rem, 7vw, 3.5rem);">a² + b² = c²
+                            </div>
+                        </div>
+                    </div>
+
+                    <template data-gsap-timeline>
+                        [
+                        { "target": ".circle-1", "to": {"scale": 1.5, "x": 100}, "position": 0 },
+                        { "target": ".circle-2", "to": {"scale": 0.8, "y": -100}, "position": 0 },
+                        { "target": ".math-main", "from": {"opacity": 0, "y": 50}, "to": {"opacity": 1, "y": 0},
+                        "position": 0.2 }
+                        ]
+                    </template>
+                </div>
+            </section>
+
+            <section>
+
+                <div data-gsap-parallax class="d-flex align-items-center justify-content-center mt-3 mb-5 d-print-none"
+                    style="border-radius: 20px; position: relative; height: 300px; background: linear-gradient(135deg, rgb(224, 231, 255) 0%, rgb(241, 245, 249) 50%, rgb(250, 232, 255) 100%); overflow: hidden;">
+                    <!-- Spheres -->
+                    <div
+                        style="position: absolute; border-radius: 50%; pointer-events: none; width: 300px; height: 300px; top: -50px; left: -50px; background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, rgba(255, 255, 255, 0) 70%);">
+                    </div>
+                    <div
+                        style="position: absolute; border-radius: 50%; pointer-events: none; width: 400px; height: 400px; bottom: -100px; right: -50px; background: radial-gradient(circle, rgba(192, 132, 252, 0.15) 0%, rgba(255, 255, 255, 0) 70%);">
+                        &nbsp;</div>
+                    <!-- Parallax Layers -->
+                    <div style="position: absolute; pointer-events: none; font-weight: 900; user-select: none; color: #818cf8; inset: 40% auto auto 8%; font-size: 3rem; opacity: 0.5;"
+                        data-gsap-depth="0.3">3x²</div>
+                    <div style="position: absolute; pointer-events: none; font-weight: 900; user-select: none; color: #a855f7; inset: 95% auto auto 15%; font-size: 2.2rem; opacity: 0.4;"
+                        data-gsap-depth="0.6">-5y</div>
+                    <div style="position: absolute; pointer-events: none; font-weight: 900; user-select: none; color: #6366f1; inset: 35% 12% auto auto; font-size: 3.5rem; opacity: 0.5;"
+                        data-gsap-depth="0.75">abc</div>
+                    <div style="position: absolute; pointer-events: none; font-weight: 900; user-select: none; color: #d946ef; inset: auto 10% 5% auto; font-size: 2.8rem; opacity: 0.4;"
+                        data-gsap-depth="0.55">7z³</div>
+                    <div style="position: absolute; pointer-events: none; font-weight: 900; user-select: none; color: #3b82f6; inset: 65% auto auto 4%; font-size: 5rem; opacity: 0.15;"
+                        data-gsap-depth="0.2">x</div>
+                    <div style="position: absolute; pointer-events: none; font-weight: 900; user-select: none; color: #8b5cf6; inset: 70% 4% auto auto; font-size: 6rem; opacity: 0.1;"
+                        data-gsap-depth="0.6">12a²b</div>
+                    <!-- Static Content -->
+                    <div class="container text-center" style="z-index: 10;">
+                        <h1 class="display-4 font-weight-bold m-0" style="color: #1e1b4b;">MONOMIS</h1>
+                        <div class="mx-auto my-3"
+                            style="width: 80px; height: 6px; background: linear-gradient(to right, #6366f1, #a855f7); border-radius: 3px;">
+                            &nbsp;</div>
+                        <p class="lead text-info mx-auto" style="max-width: 550px;">L'expressió més senzilla: un nombre
+                            multiplicat per lletres.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===================================================
+ 4. CINEMA · Travelling (Push-in)
+ ==================================================== -->
+            <section style="margin-bottom: 3rem;">
+                <h3 style="font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 700; margin-bottom: 0.5rem;">Cinema</h3>
+                <h4 style="font-size: clamp(1.1rem, 4vw, 1.8rem); font-weight: 700; margin-bottom: 1rem;">El travelling
+                </h4>
+                <p style="font-size: clamp(0.9rem, 2vw, 1.1rem); line-height: 1.6;">
+                    El <em>travelling</em> és un moviment de càmera que s'aproxima físicament al subjecte.
+                    El fons s'acosta progressivament mentre les figures del primer pla queden fixes.
+                </p>
+
+                <div data-gsap-scene data-gsap-scrub="true" class="position-relative w-100 overflow-hidden shadow-lg"
+                    style="aspect-ratio: 16/9; border-radius: 20px; background: #000; border: 1px solid rgba(255, 255, 255, 0.1); margin: 2rem 0;">
+                    <div class="position-absolute d-flex align-items-center justify-content-center cine-bg"
+                        style="top:0; left:0; width:100%; height:100%; ">
+                        <img src="https://ibsuite.es/iedib/sample/blackboard.jpg"
+                            style="width:100%; height:100%; object-fit:cover; ">
+                    </div>
+                    <div class="position-absolute d-flex align-items-end justify-content-start cine-einstein"
+                        style="width: 48%; left: 0; bottom: 0; top:0; height:100%; ">
+                        <img src="https://ibsuite.es/iedib/sample/einstein.png" class="img-fluid" style="">
+                    </div>
+
+
+                    <template data-gsap-timeline>
+                        [
+                        { "target": ".cine-bg", "to": {"scale": 1.4}, "position": 0 },
+                        { "target": ".cine-einstein", "from": {"scale": 0.9}, "to": {"scale": 1.1}, "position": 0 }
+                        ]
+                    </template>
+                </div>
+            </section>
+
+            <!-- ===================================================
+        5. SPLIT IMAGE · Natura vs Indústria
+        ==================================================== -->
+            <section style="margin-bottom: 3rem;">
+                <h3 style="font-size: clamp(1.8rem, 5vw, 2.4rem); font-weight: 700; margin-bottom: 0.5rem;">Medi Ambient
+                </h3>
+                <h4 style="font-size: clamp(1.3rem, 4vw, 1.8rem); font-weight: 700; margin-bottom: 1rem;">Dues realitats
+                </h4>
+                <p style="font-size: clamp(1rem, 2vw, 1.1rem); line-height: 1.6;">
+                    L'efecte split revela un missatge ocult quand les dues imatges es separen, simbolitzant la dualitat
+                    del nostre planeta.
+                </p>
+
+                <div data-gsap-scene data-gsap-scrub="0.5" data-gsap-start="center center"
+                    class="position-relative w-100 overflow-hidden shadow-lg"
+                    style="aspect-ratio: 21/9; border-radius: 20px; background: #000; border: 1px solid rgba(255, 255, 255, 0.1); margin: 2rem 0;">
+
+                    <!-- Background Hidden Content -->
+                    <div class="position-absolute d-flex align-items-center justify-content-center"
+                        style="top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, #22c55e 0%, #064e3b 100%);">
+                        <div class="text-center" style="color: white !important;">
+                            <div class="font-weight-bold mb-0"
+                                style="color: white !important; font-size: clamp(1.2rem, 5vw, 2.5rem);">SOSTENIBILITAT
+                            </div>
+                            <div class="small letter-spacing-1 opacity-70">L'ÚNIC CAMÍ POSSIBLE</div>
+                        </div>
+                    </div>
+
+                    <!-- Left Half -->
+                    <div class="position-absolute overflow-hidden split-left"
+                        style="top:0; left:0; width:50%; height:100%; z-index: 2; ">
+                        <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=80"
+                            style="width: 200%; height:100%; object-fit:cover; ">
+                    </div>
+
+                    <!-- Right Half -->
+                    <div class="position-absolute overflow-hidden split-right"
+                        style="top:0; right:0; width:50%; height:100%; z-index: 2; ">
+                        <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1200&q=80"
+                            style="width: 200%; height:100%; object-fit:cover; position: absolute; right: 0; ">
+                    </div>
+
+                    <template data-gsap-timeline>
+                        [
+                        { "target": ".split-left", "to": {"xPercent": -100}, "position": 0 },
+                        { "target": ".split-right", "to": {"xPercent": 100}, "position": 0 }
+                        ]
+                    </template>
+                </div>
+            </section>
+
+            <!-- ===================================================
+        6. PINNED STORYTELLING · Earth Layers
+        ==================================================== -->
+            <section style="margin-bottom: 3rem;">
+                <h3 style="font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 700; margin-bottom: 0.5rem;">Geologia
+                </h3>
+                <h4 style="font-size: clamp(1.1rem, 4vw, 1.8rem); font-weight: 700; margin-bottom: 1rem;">Capes de la
+                    Terra</h4>
+                <p style="font-size: clamp(0.9rem, 2vw, 1.1rem); line-height: 1.6;">
+                    En aquest exemple, el contingut es queda fix (pinned) mentre les capes es construeixen
+                    seqüencialment.
+                </p>
+
+                <div data-gsap-canvas data-gsap-pin="true"
+                    style="border-radius: 14px; max-width: 800px; margin: 0 auto;"
+                    data-gsap-canvas-src="https://ibsuite.es/iedib/sample/terra/frame_{i}.webp"
+                    data-gsap-canvas-frames="50" data-gsap-canvas-pad="4" data-gsap-canvas-ratio="16/9"
+                    data-gsap-canvas-fade="true" data-gsap-canvas-fade-frames="3" data-gsap-canvas-end="+=200%"
+                    data-gsap-canvas-scrub="0.8" data-gsap-canvas-start="center 40%">
+                </div>
+            </section>
+        </div>
+
+        <section style="margin: 4rem 0;">
+            <h3 style="font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 700; margin-bottom: 1rem;">Continuació de
+                l'aprenentatge</h3>
+            <p style="font-size: clamp(0.9rem, 2vw, 1.1rem); line-height: 1.6; margin-bottom: 1.5rem;">
+                Aquestes tècniques de visualització ajuden a comprendre conceptes abstractes mitjançant el moviment i la
+                interacció. La tecnologia IBGSAP permet crear aquestes experiències de forma senzilla i declarativa.
+            </p>
+        </section>
+
+        <footer style="margin-top: 4rem; padding: 2rem 0; border-top: 1px solid #eee; text-align: center;">
+            <p style="font-size: 0.9rem; color: #888;">Creat amb IBGSAP & GSAP ScrollTrigger</p>
+            <h4 style="margin: 0; font-size: 1.2rem;">Josep Mulet (c) 2026 - IEDIB Digital Learning</h4>
+        </footer>
+    </div>
+
+    <!-- GSAP Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <!-- Custom IBGSAP API -->
+    <script src="./ibgsap.js"></script>
+</body>
+
+</html>
