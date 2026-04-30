@@ -353,8 +353,96 @@
                     data-gsap-canvas-fade="true" data-gsap-canvas-end="+=200%" data-gsap-canvas-scrub="0.8"
                     data-gsap-canvas-start="center 40%">
                 </div>
+
+            </section>
+
+
+            <!-- ===================================================
+        7. PINNED STORYTELLING · Earth Layers
+        ==================================================== -->
+            <section style="margin-bottom: 3rem;">
+
+                <h3 style="font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 700; margin-bottom: 0.5rem;">Geologia
+                </h3>
+                <h4 style="font-size: clamp(1.1rem, 4vw, 1.8rem); font-weight: 700; margin-bottom: 1rem;">Capes de la
+                    Terra (Sprite Sheet)</h4>
+                <p style="font-size: clamp(0.9rem, 2vw, 1.1rem); line-height: 1.6;">
+                    En aquest exemple, el contingut es queda fix (pinned) mentre les capes es construeixen
+                    seqüencialment.
+                </p>
+
+                <div data-gsap-canvas data-gsap-canvas-sprite="true" data-gsap-canvas-cols="10"
+                    data-gsap-canvas-src="https://ibsuite.es/iedib/sample/terrasprite.webp" data-gsap-canvas-frames="50"
+                    data-gsap-canvas-ratio="16/9" data-gsap-canvas-start="center 40%" data-gsap-pin="true">
+                </div>
+
+
+                <div data-gsap-canvas data-gsap-canvas-sprite="true" data-gsap-canvas-cols="10"
+                    data-gsap-canvas-src="https://ibsuite.es/iedib/sample/mic_transposicio.webp"
+                    data-gsap-canvas-frames="80" data-gsap-canvas-ratio="16/9" data-gsap-canvas-start="center 40%"
+                    data-gsap-pin="true">
+                </div>
+
+                <div data-gsap-canvas data-gsap-canvas-sprite="true" data-gsap-canvas-cols="10"
+                    data-gsap-canvas-src="https://ibsuite.es/iedib/sample/mic_equaciolineal.webp"
+                    data-gsap-canvas-frames="150" data-gsap-canvas-ratio="16/9" data-gsap-canvas-start="center 40%"
+                    data-gsap-pin="true">
+                </div>
+            </section>
+
+            <!-- ===================================================
+        8. HYBRID INTERACTION (Scroll + Pointer) · DNA Highlight
+        ==================================================== -->
+
+            <section
+                style="margin-bottom: 4rem; position: relative; overflow: hidden; background: #111; border-radius: 18px; padding: 5rem 2rem; color: #fff;"
+                data-gsap-scene data-gsap-observe="pointer,scroll,touch,wheel" data-gsap-scrub="0.5"
+                data-gsap-start="center center">
+
+                <div style="position: relative; z-index: 10; max-width: 800px; margin: 0 auto;">
+                    <h3
+                        style="font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 700; margin-bottom: 0.5rem; color: #00d2ff;">
+                        8. Interacció Híbrida
+                    </h3>
+                    <h4 style="font-size: clamp(1.1rem, 4vw, 1.8rem); font-weight: 700; margin-bottom: 1.5rem;">
+                        Explorador d'ADN (Focus Pointer)
+                    </h4>
+                    <p style="font-size: clamp(0.9rem, 2vw, 1.1rem); line-height: 1.6; margin-bottom: 2rem;">
+                        En aquesta escena, alguns elements reaccionen al moviment del ratolí o al tacte (Observer),
+                        mentre que l'escena completa segueix el flux natural del scroll. Noteu com el focus de llum i
+                        la rotació de la icona segueixen el vostre moviment.
+                    </p>
+                </div>
+
+                <!-- Element que segueix el cursor (Focus de llum) -->
+                <div class="pointer-focus" data-gsap-observe-x="150" data-gsap-observe-y="100" style="position: absolute; top: 50%; left: 50%; width: 400px; height: 400px; 
+                            background: radial-gradient(circle, rgba(0,210,255,0.3) 0%, rgba(0,0,0,0) 70%); 
+                            border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 5;">
+                </div>
+
+                <!-- Element que rota amb el cursor -->
+                <div style="position: absolute; right: 15%; top: 25%; width: 120px; height: 120px; 
+                            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); 
+                            border-radius: 20px; display: flex; align-items: center; justify-content: center; 
+                            font-size: 3.5rem; z-index: 10;" data-gsap-observe-rotation="60">
+                    🧬
+                </div>
+                <pre data-gsap-timeline style="display:none;">
+                    [
+                    { "target": ".pointer-focus", "to": {"xPercent": 100}, "position": 0 },
+                    { "target": ".pointer-focus", "to": {"xPercent": -100}, "position": 1 }
+                    ]
+                </pre>
             </section>
         </div>
+
+        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
+            industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and
+            scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into
+            electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of
+            Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like
+            Aldus PageMaker including versions of Lorem Ipsum.
+        </p>
 
         <section style="margin: 4rem 0;">
             <h3 style="font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 700; margin-bottom: 1rem;">Continuació de

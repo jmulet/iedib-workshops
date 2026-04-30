@@ -18,7 +18,7 @@
 (function () {
   "use strict";
 
-  // ─── Configuración global ───────────────────────────────────────────────────
+  // ─── Configuració global ───────────────────────────────────────────────────
 
   var CONFIG = {
     defaults: {
@@ -41,11 +41,30 @@
       end: "+=300%",
       markers: false,
     },
+    scrollBadge: {
+      text: "Scroll per continuar",
+      translations: {
+        ca: "Scroll per continuar",
+        es: "Haz scroll para continuar",
+        en: "Scroll to continue",
+        fr: "Scrollez pour continuer",
+        de: "Scrollen zum Fortfahren"
+      },
+      bottom: "5rem",
+      background: "rgba(0,0,0,0.65)",
+      color: "#fff",
+      padding: "0.45em 1.1em",
+      borderRadius: "2em",
+      fontSize: "0.85rem",
+      letterSpacing: "0.03em",
+      transition: "opacity 0.35s ease",
+      zIndex: "9999",
+    },
     debugAttr: "data-gsap-debug",
     errorStyle: "outline: 3px solid red; outline-offset: 4px;",
   };
 
-  // ─── Utilidades ─────────────────────────────────────────────────────────────
+  // ─── Utilitats ─────────────────────────────────────────────────────────────
 
   function safeParseJSON(str, context) {
     try {
@@ -91,6 +110,44 @@
       .replace(/\bminus(?=\d)/g, "-");
   }
 
+  // ─── Badge "Scroll per continuar" ──────────────────────────────────────────
+
+  function createScrollBadge() {
+    var badgeId = "ibgsap-scroll-hint";
+    var existing = document.getElementById(badgeId);
+    if (existing) return existing;
+
+    var cfg = CONFIG.scrollBadge;
+    var badge = document.createElement("div");
+    badge.id = badgeId;
+    badge.setAttribute("aria-hidden", "true");
+
+    // Detecció d'idioma
+    var htmlLang = document.documentElement.lang || "ca";
+    var langCode = htmlLang.split("-")[0].toLowerCase();
+    var text = cfg.translations[langCode] || cfg.translations["ca"];
+    badge.textContent = "↓ " + text;
+
+    Object.assign(badge.style, {
+      position: "fixed",
+      bottom: cfg.bottom,
+      left: "50%",
+      transform: "translateX(-50%)",
+      background: cfg.background,
+      color: cfg.color,
+      padding: cfg.padding,
+      borderRadius: cfg.borderRadius,
+      fontSize: cfg.fontSize,
+      letterSpacing: cfg.letterSpacing,
+      pointerEvents: "none",
+      zIndex: cfg.zIndex,
+      opacity: "0",
+      transition: cfg.transition,
+    });
+    document.body.appendChild(badge);
+    return badge;
+  }
+
   // ─── Constructor de timelines ────────────────────────────────────────────────
 
   function buildTimeline(steps, scope, debug) {
@@ -117,8 +174,8 @@
 
       var el;
       if (Array.isArray(step.target)) {
-        el = step.target.map(function (sel) { 
-          return scope.querySelector(normalizeSymbols(sel)); 
+        el = step.target.map(function (sel) {
+          return scope.querySelector(normalizeSymbols(sel));
         }).filter(Boolean);
       } else {
         el = scope.querySelector(normalizeSymbols(step.target));
@@ -133,7 +190,7 @@
       var to = {};
       var stepTo = step.to || {};
       for (var key in stepTo) { to[key] = stepTo[key]; }
-      
+
       var position = normalizeSymbols(step.position !== undefined ? step.position : CONFIG.defaults.position);
 
       to.duration = step.duration !== undefined ? step.duration : CONFIG.defaults.duration;
@@ -160,7 +217,7 @@
     return tl;
   }
 
-  // ─── Inicialización de escena (sistema original) ─────────────────────────────
+  // ─── Inicialització d'escena (sistema original) ──────────────────────────────
 
   function initScene(scene) {
     var debug = boolAttr(scene, CONFIG.debugAttr) ||
@@ -171,7 +228,6 @@
     if (!tmpl) {
       if (debug) console.log("[gsap-init] escena sin timeline:", scene);
     } else {
-      // Si usamos pre o code (porque TinyMCE borra <template>), debemos ocultarlos
       if (tmpl.tagName !== "TEMPLATE") {
         tmpl.style.display = "none";
       }
@@ -218,12 +274,78 @@
     ScrollTrigger.create(stConfig);
   }
 
-  // ─── Inicialización canvas ───────────────────────────────────────────────────
+  // ─── Interaccions de pointer (Observer) ──────────────────────────────────────
+
+  function initObserver(container, debug) {
+    var observedElements = container.querySelectorAll("[data-gsap-observe-x], [data-gsap-observe-y], [data-gsap-observe-rotation], [data-gsap-observe-opacity], [data-gsap-observe-scale]");
+    if (!observedElements.length) return;
+
+    var targets = [];
+    observedElements.forEach(function (el) {
+      var d = el.dataset;
+      var props = {};
+      var found = false;
+      for (var k in d) {
+        if (k.indexOf("gsapObserve") === 0 && k !== "gsapObserve") {
+          var prop = k.replace("gsapObserve", "");
+          prop = prop.charAt(0).toLowerCase() + prop.slice(1);
+          props[prop] = parseFloat(d[k]);
+          found = true;
+        }
+      }
+      if (found) {
+        var qTo = {};
+        for (var p in props) {
+          qTo[p] = gsap.quickTo(el, p, { duration: 0.8, ease: "power2" });
+        }
+        targets.push({ el: el, props: props, qTo: qTo });
+      }
+    });
+
+    if (!targets.length) return;
+    if (debug) console.log("[gsap-init] Inicialitzant Observer per a", container);
+
+    var obsType = container.dataset.gsapObserve || "pointer";
+    if (obsType === "true") obsType = "pointer";
+
+    Observer.create({
+      target: container,
+      type: obsType,
+      onMove: function (self) {
+        var rect = container.getBoundingClientRect();
+        // Posició relativa al centre (-1 a 1)
+        var relX = ((self.x - rect.left) / rect.width) * 2 - 1;
+        var relY = ((self.y - rect.top) / rect.height) * 2 - 1;
+
+        targets.forEach(function (t) {
+          for (var p in t.qTo) {
+            var mult = t.props[p];
+            var val = 0;
+            if (p === "x" || p === "rotation" || p === "skewX") {
+              val = relX * mult;
+            } else if (p === "y" || p === "skewY") {
+              val = relY * mult;
+            } else if (p === "opacity") {
+              // Simular pèrdua d'opacitat als extrems si el mult és negatiu
+              val = 1 + (Math.max(Math.abs(relX), Math.abs(relY)) * mult);
+            } else {
+              val = (Math.max(Math.abs(relX), Math.abs(relY))) * mult;
+            }
+            t.qTo[p](val);
+          }
+        });
+      }
+    });
+  }
+
+  // ─── Inicialització canvas ───────────────────────────────────────────────────
 
   function initCanvas(wrapper) {
     var d = wrapper.dataset;
     var srcPattern = d.gsapCanvasSrc;
     var totalFrames = parseInt(d.gsapCanvasFrames);
+    var isSprite = (d.gsapCanvasSprite || "false") === "true";
+    var spriteCols = parseInt(d.gsapCanvasCols || "1");
     var pad = parseInt(d.gsapCanvasPad !== undefined ? d.gsapCanvasPad : CONFIG.canvas.pad);
     var scrub = parseFloat(d.gsapCanvasScrub !== undefined ? d.gsapCanvasScrub : CONFIG.canvas.scrub);
     var useFade = (d.gsapCanvasFade !== undefined ? d.gsapCanvasFade : String(CONFIG.canvas.fade)) === "true";
@@ -258,7 +380,8 @@
     var ctx = canvas.getContext("2d");
     var currentFrame = 0;
 
-    var frames = new Array(totalFrames);
+    var spriteImg = null;
+    var frames = isSprite ? null : new Array(totalFrames);
     var loaded = 0;
     var errored = 0;
 
@@ -275,18 +398,31 @@
       onLoad();
     }
 
-    for (var i = 0; i < totalFrames; i++) {
-        (function(idx) {
-            var img = new Image();
-            var indexStr = String(idx);
-            if (pad > 0) {
-              while (indexStr.length < pad) { indexStr = "0" + indexStr; }
-            }
-            img.src = srcPattern.replace("{i}", indexStr);
-            img.onload = onLoad;
-            img.onerror = function() { onError(idx); };
-            frames[idx] = img;
+    if (isSprite) {
+      spriteImg = new Image();
+      spriteImg.src = srcPattern;
+      spriteImg.onload = function () {
+        loaded = totalFrames;
+        resizeCanvas();
+        initScrollTrigger();
+      };
+      spriteImg.onerror = function () {
+        markError(wrapper, "Error cargando sprite: " + srcPattern);
+      };
+    } else {
+      for (var i = 0; i < totalFrames; i++) {
+        (function (idx) {
+          var img = new Image();
+          var indexStr = String(idx);
+          if (pad > 0) {
+            while (indexStr.length < pad) { indexStr = "0" + indexStr; }
+          }
+          img.src = srcPattern.replace("{i}", indexStr);
+          img.onload = onLoad;
+          img.onerror = function () { onError(idx); };
+          frames[idx] = img;
         })(i);
+      }
     }
 
     function resizeCanvas() {
@@ -309,6 +445,42 @@
       var h = canvas.height / dpr;
 
       ctx.clearRect(0, 0, w, h);
+
+      if (isSprite) {
+        if (!spriteImg || !spriteImg.complete) return;
+        var sw = spriteImg.width / spriteCols;
+        var rows = Math.ceil(totalFrames / spriteCols);
+        var sh = spriteImg.height / rows;
+
+        if (!useFade || totalFrames < 2) {
+          var f = Math.max(0, Math.min(totalFrames - 1, Math.round(frameIndex)));
+          var row = Math.floor(f / spriteCols);
+          var col = f % spriteCols;
+          ctx.drawImage(spriteImg, col * sw, row * sh, sw, sh, 0, 0, w, h);
+          return;
+        }
+
+        var exact = Math.max(0, Math.min(totalFrames - 1, frameIndex));
+        var prev = Math.floor(exact);
+        var next = Math.min(prev + 1, totalFrames - 1);
+        var blend = smoothBlend(exact - prev, fadeFrames / totalFrames);
+
+        if (blend === 0 || prev === next) {
+          var r = Math.floor(prev / spriteCols);
+          var c = prev % spriteCols;
+          ctx.drawImage(spriteImg, c * sw, r * sh, sw, sh, 0, 0, w, h);
+        } else {
+          var r1 = Math.floor(prev / spriteCols), c1 = prev % spriteCols;
+          var r2 = Math.floor(next / spriteCols), c2 = next % spriteCols;
+
+          ctx.globalAlpha = 1;
+          ctx.drawImage(spriteImg, c1 * sw, r1 * sh, sw, sh, 0, 0, w, h);
+          ctx.globalAlpha = blend;
+          ctx.drawImage(spriteImg, c2 * sw, r2 * sh, sw, sh, 0, 0, w, h);
+        }
+        ctx.globalAlpha = 1;
+        return;
+      }
 
       if (!useFade || totalFrames < 2) {
         var f = Math.max(0, Math.min(totalFrames - 1, Math.round(frameIndex)));
@@ -338,6 +510,12 @@
     }
 
     function initScrollTrigger() {
+      // ─── Badge "Scroll per continuar" ─────────────────────────────────────
+      var badge = createScrollBadge();
+      function showBadge() { badge.style.opacity = "1"; }
+      function hideBadge() { badge.style.opacity = "0"; }
+      // ──────────────────────────────────────────────────────────────────────
+
       var state = { frame: 0 };
       gsap.to(state, {
         frame: totalFrames - 1,
@@ -349,16 +527,20 @@
           scrub: scrub,
           markers: markers,
           pin: true,
-          anticipatePin: 1
+          anticipatePin: 1,
+          onEnter: showBadge,
+          onLeave: hideBadge,
+          onEnterBack: showBadge,
+          onLeaveBack: hideBadge,
         },
-        onUpdate: function() {
+        onUpdate: function () {
           currentFrame = state.frame;
           drawFrame(state.frame);
         }
       });
     }
 
-    window.addEventListener("ibgsap:layout", function() {
+    window.addEventListener("ibgsap:layout", function () {
       resizeCanvas();
       ScrollTrigger.refresh();
     });
@@ -375,7 +557,7 @@
 
     var start = normalizeSymbols(wrapper.dataset.gsapStart !== undefined ? wrapper.dataset.gsapStart : "top bottom");
     var end = normalizeSymbols(wrapper.dataset.gsapEnd !== undefined ? wrapper.dataset.gsapEnd : "bottom top");
-    
+
     var scrub = wrapper.dataset.gsapScrub;
     if (scrub === undefined || scrub === "true") scrub = true;
     else if (scrub === "false") scrub = false;
@@ -405,9 +587,13 @@
 
     if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") return;
 
-    gsap.registerPlugin(ScrollTrigger);
+    if (typeof Observer === "undefined" && typeof ScrollTrigger.Observer !== "undefined") {
+      window.Observer = ScrollTrigger.Observer;
+    }
 
-    var refreshAll = function() {
+    gsap.registerPlugin(ScrollTrigger, Observer);
+
+    var refreshAll = function () {
       ScrollTrigger.refresh();
       window.dispatchEvent(new CustomEvent("ibgsap:layout"));
     };
@@ -421,7 +607,7 @@
 
     var genericParallaxes = document.querySelectorAll("[data-gsap-parallax]");
     for (var i = 0; i < genericParallaxes.length; i++) {
-        initGenericParallax(genericParallaxes[i]);
+      initGenericParallax(genericParallaxes[i]);
     }
 
     var scenes = document.querySelectorAll("[data-gsap-scene]");
@@ -447,7 +633,12 @@
 
     var canvases = document.querySelectorAll("[data-gsap-canvas]");
     for (var m = 0; m < canvases.length; m++) {
-        initCanvas(canvases[m]);
+      initCanvas(canvases[m]);
+    }
+
+    var observers = document.querySelectorAll("[data-gsap-observe]");
+    for (var n = 0; n < observers.length; n++) {
+      initObserver(observers[n], false);
     }
   }
 

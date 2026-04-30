@@ -20,7 +20,7 @@ console.log(" ")
 
 const ignoreAllBundle = ["flipcards.js"];
 // ALL bundle must ensure this order
-const precedences = ['overlay.js', 'iapace.js', 'sections.js', 'tiles.js', 'confetti.js', 'smartquizz.js', 'aos.js', 'ibparallax.js'];
+const precedences = ['overlay.js', 'iapace.js', 'sections.js', 'tiles.js', 'confetti.js', 'smartquizz.js', 'aos.js'];
 
 
 // Uglify all files
@@ -93,7 +93,12 @@ fs.readdirSync(src).forEach((file) => {
         console.log(result.warnings)
     }
 
-    let code = bundledDeps + result.code;
+    // Wrap deps in a closure that shadows define/require to force UMD libs
+    // to fall back to their window/global export path.
+    const wrappedDeps = bundledDeps
+        ? `\n(function(define,require){${bundledDeps}}(void 0,void 0));\n`
+        : "";
+    let code = wrappedDeps + result.code;
 
     if (!ignoreAllBundle.includes(file)) {
         const indx = precedences.indexOf(file)
