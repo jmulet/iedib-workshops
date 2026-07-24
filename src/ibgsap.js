@@ -341,6 +341,13 @@
   // ─── Inicialització canvas ───────────────────────────────────────────────────
 
   function initCanvas(wrapper) {
+    if (window.matchMedia("print").matches) {
+      if (!wrapper.classList.contains("d-print-none")) {
+        wrapper.classList.add("d-print-none");
+      }
+      return;
+    }
+
     var d = wrapper.dataset;
     var srcPattern = d.gsapCanvasSrc;
     var totalFrames = parseInt(d.gsapCanvasFrames);
@@ -584,6 +591,7 @@
   function init() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (window.matchMedia("print").matches) return;
+    if (document.body && document.body.classList.contains("page-mod-book-print")) return;
 
     if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") return;
 

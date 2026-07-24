@@ -18,7 +18,7 @@ console.log(`> src=${src}`)
 console.log(`> dst=${dst}`)
 console.log(" ")
 
-const ignoreAllBundle = ["flipcards.js"];
+const ignoreAllBundle = ["flipcards.js", "ibgsap.js", "ibparallax.js"];
 // ALL bundle must ensure this order
 const precedences = ['overlay.js', 'iapace.js', 'sections.js', 'tiles.js', 'confetti.js', 'smartquizz.js', 'aos.js'];
 
