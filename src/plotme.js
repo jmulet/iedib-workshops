@@ -8,7 +8,6 @@
         console.error("Error: JSXGraph not loaded");
         return;
     }
-    JXG.Options.text.useMathJax = true;
     var COMPONENT_NAME = "plotme";
     if (window.IB.sd[COMPONENT_NAME]) {
         // Already loaded in page
@@ -203,7 +202,39 @@
         alias.inst = {};
     };
 
-    bind();
+    // Defer bind() until MathJax is ready so that JSXGraph can typeset labels
+    // correctly. Moodle loads MathJax asynchronously, so it may not be available
+    // at component initialisation time.
+    var doBind = function () {
+        JXG.Options.text.useMathJax = true;
+        bind();
+    };
+
+    if (typeof window.MathJax === "undefined") {
+        // MathJax not present yet – poll until it appears (max ~3 s), then bind.
+        var _polls = 0;
+        var _poll = setInterval(function () {
+            _polls++;
+            if (typeof window.MathJax !== "undefined") {
+                clearInterval(_poll);
+                // Give MathJax a tick to finish its own setup
+                setTimeout(doBind, 50);
+            } else if (_polls > 60) {
+                // MathJax never arrived – bind anyway without it
+                clearInterval(_poll);
+                JXG.Options.text.useMathJax = false;
+                bind();
+            }
+        }, 50);
+    } else if (window.MathJax.startup && window.MathJax.startup.promise) {
+        // MathJax v3 – wait for the startup promise
+        window.MathJax.startup.promise.then(doBind);
+    } else if (window.MathJax.Hub) {
+        // MathJax v2 – queue the bind after current typeset queue drains
+        window.MathJax.Hub.Queue(doBind);
+    } else {
+        doBind();
+    }
 
 
 })();

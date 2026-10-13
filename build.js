@@ -55,9 +55,25 @@ fs.readdirSync(src).forEach((file) => {
     const srcPath = path.join(src, file);
     const srcCode = fs.readFileSync(srcPath, "utf8");
 
-    // Process // @require directives
-    const requireLines = srcCode.match(/\/\/ @require\s+(.+)/g) || [];
+    // Process /*@include: ./path/to/file */ directives.
+    // Included files go into bundledDeps so they are wrapped in the UMD-shadowing
+    // closure (function(define,require){...}(void 0,void 0)), which prevents
+    // Moodle's RequireJS from intercepting AMD-aware libraries like JSXGraph.
+    const includeRegex = /\/\*@include:\s*(.+?)\s*\*\//g;
     let bundledDeps = "";
+    let processedCode = srcCode.replace(includeRegex, (match, includePath) => {
+        const resolvedPath = path.resolve(__dirname, includePath);
+        if (fs.existsSync(resolvedPath)) {
+            console.log("  > Including local file: " + resolvedPath);
+            bundledDeps += fs.readFileSync(resolvedPath, "utf8") + "\n";
+        } else {
+            console.error("  ! Include not found: " + resolvedPath);
+        }
+        return ""; // strip the directive comment from the source
+    });
+
+    // Process // @require directives (remote URLs, also go into bundledDeps)
+    const requireLines = processedCode.match(/\/\/ @require\s+(.+)/g) || [];
     requireLines.forEach(line => {
         const url = line.replace("// @require", "").trim();
         bundledDeps += fetchUrl(url) + "\n";
@@ -84,7 +100,7 @@ fs.readdirSync(src).forEach((file) => {
     }
 
     // Minify source (without deps to avoid double-minification and potential errors)
-    const result = UglifyJS.minify(srcCode, { fromString: true, ...options });
+    const result = UglifyJS.minify(processedCode, { fromString: true, ...options });
 
     if (result.error) {
         console.error(result.error)
@@ -93,10 +109,12 @@ fs.readdirSync(src).forEach((file) => {
         console.log(result.warnings)
     }
 
-    // Wrap deps in a closure that shadows define/require to force UMD libs
-    // to fall back to their window/global export path.
+    // Wrap deps in a closure that shadows define/require/exports/module to force
+    // UMD libs to fall back to their window/global export path.
+    // JSXGraph 1.4 (almond) checked define.amd first; JSXGraph 1.14 (Webpack)
+    // checks "module.exports" first — so we must shadow exports & module too.
     const wrappedDeps = bundledDeps
-        ? `\n(function(define,require){${bundledDeps}}(void 0,void 0));\n`
+        ? `\n(function(define,require,exports,module){${bundledDeps}}(void 0,void 0,void 0,void 0));\n`
         : "";
     let code = wrappedDeps + result.code;
 
